@@ -276,19 +276,28 @@ h1 {
 section { padding: 6rem 2rem; }
 .section-container { max-width: 1400px; margin: 0 auto; }
 .section-header { text-align: center; margin-bottom: 4rem; }
+.section-header > * { text-align: center; }
 .section-tag {
     font-family: 'Space Mono', monospace;
     font-size: 0.78rem; color: var(--accent-cyan);
-    text-transform: uppercase; letter-spacing: 2px;
-    margin-bottom: 1rem; display: block;
+    text-transform: uppercase; letter-spacing: 3px;
+    margin-bottom: 0.75rem; display: block;
 }
 .section-title {
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700; margin-bottom: 1rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+.section-title .hl {
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 .section-subtitle {
     font-size: 1.05rem; color: var(--text-secondary);
-    max-width: 600px; margin: 0 auto;
+    max-width: 600px; margin: 0 auto; text-align: center;
 }
 .bg-secondary { background: var(--bg-secondary); }
 
@@ -361,8 +370,8 @@ section { padding: 6rem 2rem; }
 }
 .feature-icon svg { filter: drop-shadow(0 0 4px rgba(0,212,170,0.4)); }
 .feature:hover .feature-icon { box-shadow: 0 0 20px rgba(0, 212, 170, 0.2); }
-.feature h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
-.feature p  { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.65; }
+.feature h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; text-align: center; width: 100%; }
+.feature p  { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.65; text-align: center; width: 100%; }
 
 /* ── SIGNAL CODE BLOCK ───────────────────────────────────────────────────── */
 .signal-block {
@@ -637,7 +646,7 @@ footer {
   <div class="section-container">
     <div class="section-header">
       <span class="section-tag">Process</span>
-      <h2 class="section-title">How the signals are generated</h2>
+      <h2 class="section-title">How the signals are <span class="hl">generated</span></h2>
       <p class="section-subtitle">From data refresh to Telegram alert in under 15 minutes. Every weekday.</p>
     </div>
     <div class="process-steps">
@@ -680,7 +689,7 @@ footer {
   <div class="section-container">
     <div class="section-header">
       <span class="section-tag">Infrastructure</span>
-      <h2 class="section-title">Major-firm ML standards, applied here</h2>
+      <h2 class="section-title">Major-firm ML standards, <span class="hl">applied here</span></h2>
       <p class="section-subtitle">The same methodological discipline used at quantitative shops — deployed on Google Cloud.</p>
     </div>
     <div class="features">
@@ -761,7 +770,7 @@ footer {
   <div class="section-container">
     <div class="section-header">
       <span class="section-tag">Pricing</span>
-      <h2 class="section-title">Simple, transparent pricing</h2>
+      <h2 class="section-title">Simple, <span class="hl">transparent pricing</span></h2>
       <p class="section-subtitle">One tier. Cancel anytime. No lock-in.</p>
     </div>
     <div class="pricing-wrap">
