@@ -1,0 +1,37 @@
+{
+  "generated_at_utc": "2026-08-12T05:09:01+00:00",
+  "spy": {
+    "latest": 770.56,
+    "five_day_return_pct": -0.1
+  },
+  "vix": {
+    "latest": 15.28
+  },
+  "top_crypto": [
+    {
+      "symbol": "BTC",
+      "price_usd": 63678,
+      "change_24h_pct": -0.6
+    },
+    {
+      "symbol": "ETH",
+      "price_usd": 1885.5,
+      "change_24h_pct": 0.4
+    },
+    {
+      "symbol": "USDT",
+      "price_usd": 0.999097,
+      "change_24h_pct": 0
+    },
+    {
+      "symbol": "BNB",
+      "price_usd": 613.75,
+      "change_24h_pct": 2.4
+    },
+    {
+      "symbol": "USDC",
+      "price_usd": 0.999547,
+      "change_24h_pct": 0
+    }
+  ]
+}

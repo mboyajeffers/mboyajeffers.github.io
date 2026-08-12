@@ -2,3 +2,4 @@
 *.swp
 .vscode/
 boot/
+__pycache__/

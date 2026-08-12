@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Pulse — Mboya Jeffers</title>
+<meta name="description" content="A live market snapshot, regenerated on a schedule by a GitHub Action — SPY, VIX, and top crypto by market cap. The commit history is the proof.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-primary: #0a0e14;
+        --bg-secondary: #121820;
+        --bg-card: #1a2130;
+        --accent-cyan: #00d4aa;
+        --accent-blue: #3b82f6;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border-color: #2a3441;
+        --gradient-1: linear-gradient(135deg, #00d4aa 0%, #3b82f6 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        padding: 3rem 1.5rem;
+    }
+
+    .mono { font-family: 'Space Mono', monospace; }
+    a { color: var(--accent-cyan); }
+
+    .wrap { max-width: 760px; margin: 0 auto; }
+
+    .back { display: inline-block; margin-bottom: 2rem; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+    .back:hover { color: var(--accent-cyan); }
+
+    h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+    .updated {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 2.5rem;
+    }
+    .updated .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); margin-right: 0.5rem; }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .stat-value { font-family: 'Space Mono', monospace; font-size: 1.6rem; font-weight: 700; }
+    .stat-sub { font-family: 'Space Mono', monospace; font-size: 0.85rem; margin-top: 0.25rem; }
+    .up { color: var(--accent-cyan); }
+    .down { color: #f87171; }
+
+    table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+    th { text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-family: 'Space Mono', monospace; font-size: 0.9rem; }
+    tr:last-child td { border-bottom: none; }
+
+    .note { margin-top: 2.5rem; padding: 1.25rem; background: var(--bg-secondary); border-left: 3px solid var(--accent-cyan); border-radius: 8px; font-size: 0.9rem; color: var(--text-secondary); }
+    .note a { text-decoration: underline; }
+
+    .error { color: #f87171; font-family: 'Space Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <a href="/" class="back">← mboyajeffers.github.io</a>
+    <h1>Market Pulse</h1>
+    <p class="subtitle">SPY, VIX, and top crypto by market cap — regenerated on a schedule by a GitHub Action, not hand-updated.</p>
+    <div class="updated mono" id="updated"><span class="dot"></span>Loading…</div>
+
+    <div class="grid" id="stats"></div>
+
+    <table id="crypto-table">
+        <thead><tr><th>Asset</th><th>Price (USD)</th><th>24h</th></tr></thead>
+        <tbody id="crypto-body"></tbody>
+    </table>
+
+    <div class="note">
+        The timestamp above is the actual proof: check <a href="https://github.com/mboyajeffers/mboyajeffers.github.io/commits/main/market-pulse/data.json" target="_blank" rel="noopener">the commit history on data.json</a> to see every update, or <a href="https://github.com/mboyajeffers/mboyajeffers.github.io/blob/main/.github/workflows/dashboard.yml" target="_blank" rel="noopener">the workflow that generates it</a>.
+    </div>
+</div>
+
+<script>
+fetch('data.json?_=' + Date.now())
+    .then(r => r.json())
+    .then(d => {
+        const updated = new Date(d.generated_at_utc);
+        const mins = Math.round((Date.now() - updated.getTime()) / 60000);
+        const ago = mins < 60 ? `${mins}m ago` : `${Math.round(mins/60)}h ago`;
+        document.getElementById('updated').innerHTML =
+            `<span class="dot"></span>Last updated: ${updated.toUTCString()} (${ago})`;
+
+        const spyClass = d.spy.five_day_return_pct >= 0 ? 'up' : 'down';
+        const spySign = d.spy.five_day_return_pct >= 0 ? '+' : '';
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-label">SPY</div>
+                <div class="stat-value mono">$${d.spy.latest}</div>
+                <div class="stat-sub mono ${spyClass}">${spySign}${d.spy.five_day_return_pct}% (5d)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">VIX</div>
+                <div class="stat-value mono">${d.vix.latest}</div>
+            </div>
+        `;
+
+        document.getElementById('crypto-body').innerHTML = d.top_crypto.map(c => {
+            const cls = c.change_24h_pct >= 0 ? 'up' : 'down';
+            const sign = c.change_24h_pct >= 0 ? '+' : '';
+            return `<tr>
+                <td>${c.symbol}</td>
+                <td>$${c.price_usd.toLocaleString()}</td>
+                <td class="${cls}">${sign}${c.change_24h_pct}%</td>
+            </tr>`;
+        }).join('');
+    })
+    .catch(err => {
+        document.getElementById('updated').innerHTML = '<span class="error">Could not load data.json — ' + err + '</span>';
+    });
+</script>
+</body>
+</html>
