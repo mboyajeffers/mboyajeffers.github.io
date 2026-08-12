@@ -2,14 +2,765 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=signals/">
-<title>Mboya Jeffers — Morning Signals</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mboya Jeffers — Data Engineer & AI Systems Consultant</title>
+<meta name="description" content="Data engineer specializing in production pipelines, ML signal systems, and the operational discipline most teams skip until something breaks. Solo-built, actively maintained, code publicly auditable.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  body { background: #03070f; color: #00d4ff; font-family: system-ui; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-  a { color: #00d4ff; text-shadow: 0 0 20px rgba(0,212,255,0.6); }
+    :root {
+        --bg-primary: #0a0e14;
+        --bg-secondary: #121820;
+        --bg-card: #1a2130;
+        --accent-cyan: #00d4aa;
+        --accent-blue: #3b82f6;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border-color: #2a3441;
+        --gradient-1: linear-gradient(135deg, #00d4aa 0%, #3b82f6 100%);
+        --gradient-2: linear-gradient(135deg, #1a2130 0%, #0a0e14 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    .mono { font-family: 'Space Mono', monospace; }
+
+    a { color: inherit; }
+
+    /* Navigation */
+    nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 1000;
+        padding: 1rem 2rem;
+        background: rgba(10, 14, 20, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+    }
+
+    .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent-cyan); }
+
+    .nav-cta {
+        background: var(--gradient-1);
+        color: var(--bg-primary);
+        padding: 0.65rem 1.25rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .nav-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
+    }
+
+    /* Hero */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 8rem 2rem 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background:
+            radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 170, 0.15), transparent),
+            radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59, 130, 246, 0.1), transparent);
+        pointer-events: none;
+    }
+
+    .hero-grid {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image:
+            linear-gradient(rgba(42, 52, 65, 0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(42, 52, 65, 0.3) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+        pointer-events: none;
+    }
+
+    .hero-container {
+        max-width: 900px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero h1 {
+        font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero h1 .highlight {
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        max-width: 640px;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-ctas {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 3.5rem;
+    }
+
+    .btn-primary {
+        background: var(--gradient-1);
+        color: var(--bg-primary);
+        padding: 0.9rem 1.75rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 212, 170, 0.35);
+    }
+
+    .btn-secondary {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.9rem 1.75rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 212, 170, 0.1);
+    }
+
+    .hero-stats {
+        display: flex;
+        gap: 3rem;
+        padding-top: 2.5rem;
+        border-top: 1px solid var(--border-color);
+        flex-wrap: wrap;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent-cyan);
+        font-family: 'Space Mono', monospace;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    /* Trust Bar */
+    .trust-bar {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.75rem 2rem;
+    }
+
+    .trust-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .trust-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .trust-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent-cyan);
+        flex-shrink: 0;
+    }
+
+    /* Section Styles */
+    section { padding: 5rem 2rem; }
+
+    .section-container { max-width: 1000px; margin: 0 auto; }
+
+    .section-header { margin-bottom: 3rem; }
+
+    .section-tag {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--accent-cyan);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+        font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        max-width: 650px;
+    }
+
+    /* Scope Section */
+    .scope {
+        background: var(--bg-secondary);
+    }
+
+    .scope-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-left: 3px solid var(--accent-cyan);
+        border-radius: 12px;
+        padding: 2rem 2.25rem;
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.75;
+    }
+
+    .scope-box strong { color: var(--text-primary); }
+
+    /* Services */
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 2rem;
+    }
+
+    .service-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2.25rem;
+        transition: all 0.3s;
+    }
+
+    .service-card:hover {
+        border-color: var(--accent-cyan);
+        transform: translateY(-4px);
+    }
+
+    .service-name {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .service-price {
+        font-family: 'Space Mono', monospace;
+        color: var(--accent-cyan);
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .service-desc {
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+        line-height: 1.7;
+    }
+
+    .service-includes {
+        list-style: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .service-includes li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        margin-bottom: 0.65rem;
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .service-includes li::before {
+        content: '✓';
+        color: var(--accent-cyan);
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .service-scope-note {
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    /* Proof */
+    .proof { background: var(--bg-secondary); }
+
+    .proof-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .proof-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.75rem;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s;
+        display: block;
+    }
+
+    .proof-card:hover {
+        border-color: var(--accent-cyan);
+        transform: translateY(-4px);
+    }
+
+    .proof-tag {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--accent-cyan);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.75rem;
+    }
+
+    .proof-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .proof-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* How It Works */
+    .process-steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+    }
+
+    .process-step { text-align: left; }
+
+    .step-number {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.85rem;
+        color: var(--accent-cyan);
+        margin-bottom: 0.75rem;
+    }
+
+    .step-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    /* About */
+    .about { background: var(--bg-secondary); }
+
+    .about p {
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+        line-height: 1.8;
+        font-size: 1.02rem;
+    }
+
+    .about p strong { color: var(--text-primary); }
+
+    /* CTA Section */
+    .cta-section {
+        background: var(--gradient-2);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 50% 80% at 50% 100%, rgba(0, 212, 170, 0.2), transparent);
+    }
+
+    .cta-content { position: relative; z-index: 1; }
+
+    .cta-content h2 {
+        font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+        margin-bottom: 1rem;
+    }
+
+    .cta-content p {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cta-ctas {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Footer */
+    footer {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding: 2.5rem 2rem;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 1.5rem;
+        list-style: none;
+    }
+
+    .footer-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--accent-cyan); }
+
+    .footer-copy {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .process-steps { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+        .nav-links { display: none; }
+        .hero-stats { gap: 2rem; }
+        .process-steps { grid-template-columns: 1fr; }
+        .footer-container { flex-direction: column; text-align: center; }
+    }
 </style>
 </head>
 <body>
-  <p>Redirecting... <a href="signals/">Morning Signals</a></p>
+
+<nav>
+    <div class="nav-container">
+        <a href="#" class="logo">Mboya Jeffers</a>
+        <ul class="nav-links">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#proof">Proof</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+        <a href="mailto:mboyajeffers9@gmail.com" class="nav-cta">Get in touch</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-container">
+        <h1>I build the data infrastructure most companies <span class="highlight">delay until it breaks.</span></h1>
+        <p class="hero-subtitle">
+            Data engineer specializing in production pipelines and the operational discipline — monitoring, access control, CI/CD — most teams skip until something goes wrong. Solo-built, currently live, fully auditable.
+        </p>
+        <div class="hero-ctas">
+            <a href="mailto:mboyajeffers9@gmail.com" class="btn-primary">Get in touch →</a>
+            <a href="https://github.com/mboyajeffers" class="btn-secondary" target="_blank" rel="noopener">View the code</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-value mono">4.3M+</div>
+                <div class="stat-label">Verified rows processed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value mono">8+</div>
+                <div class="stat-label">Industries covered</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value mono">CI</div>
+                <div class="stat-label">Passing, every commit</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Bar -->
+<div class="trust-bar">
+    <div class="trust-container">
+        <div class="trust-item"><div class="trust-dot"></div><span>Every claim verifiable on GitHub</span></div>
+        <div class="trust-item"><div class="trust-dot"></div><span>MIT-licensed public code</span></div>
+        <div class="trust-item"><div class="trust-dot"></div><span>Real production-grade infrastructure, not a demo</span></div>
+        <div class="trust-item"><div class="trust-dot"></div><span>GCP · Terraform · CI/CD</span></div>
+    </div>
+</div>
+
+<!-- Scope -->
+<section class="scope">
+    <div class="section-container">
+        <div class="scope-box">
+            <strong>What this is, and isn't:</strong> This is data engineering and applied machine learning — pipelines, automation, and the infrastructure that keeps them running. It is <strong>not</strong> a chatbot wrapper, <strong>not</strong> a generic "AI strategy" engagement, and <strong>not</strong> a promise to automate your entire business. If your problem is a manual process that should be a reliable pipeline, or a growing dataset with no monitoring, that's exactly what I build.
+        </div>
+    </div>
+</section>
+
+<!-- Services -->
+<section id="services">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-tag">Services</div>
+            <h2 class="section-title">Two ways to work together</h2>
+            <p class="section-subtitle">Fixed scope, scoped price on a discovery call — or ongoing capacity if you need it maintained and extended.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-name">Custom Data Pipeline & Automation Build</div>
+                <div class="service-price mono">$3,000–$6,000 · scoped on a call · 5 business days</div>
+                <p class="service-desc">One pipeline, one data source, production-grade from day one — not a prototype. Most single-source builds land $3,500–$4,000; price is fixed before work starts, not hourly.</p>
+                <ul class="service-includes">
+                    <li>Idempotent ingestion — safe to re-run without duplicating data</li>
+                    <li>Schema validation with explicit quality gates</li>
+                    <li>Dead-letter queue for records that fail validation, instead of silently dropping them</li>
+                    <li>Delivery in your format — Parquet, PDF, or dashboard</li>
+                    <li>Documentation so your team can maintain it</li>
+                </ul>
+                <div class="service-scope-note">Out of scope at this tier: multi-source orchestration, ML modeling, ongoing maintenance — see the partner tier for that.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-name">Embedded AI & Data Systems Partner</div>
+                <div class="service-price mono">From $2,500/month · scoped in the discovery call</div>
+                <p class="service-desc">Ongoing ownership of what's already built, plus new pipelines as they come up. Engineering capacity, scoped and billed like engineering capacity — not a generic AI-strategy retainer.</p>
+                <ul class="service-includes">
+                    <li>SLO-based monitoring with error-budget burn-rate alerting — not just up/down</li>
+                    <li>RBAC with an immutable audit trail where the data needs access control</li>
+                    <li>CI/CD so nothing ships without tests passing</li>
+                    <li>New automation builds as needs arise</li>
+                    <li>Direct access via message for ad hoc data pulls or fixes</li>
+                </ul>
+                <div class="service-scope-note">Cancel anytime with 7 days' notice. No long-term commitment.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-name">Custom Research & Outreach Agents</div>
+                <div class="service-price mono">Scoped on a call</div>
+                <p class="service-desc">An agent that does the work of a full-time researcher/SDR: finds people or companies matching your exact criteria, researches each one, scores fit, and drafts the first outreach message — you review and send. Built the same way as Jack, the agent I run for my own sales pipeline.</p>
+                <ul class="service-includes">
+                    <li>Defined fit rubric, not a black-box score</li>
+                    <li>Research summary per candidate, not just a name and a link</li>
+                    <li>Personalized outreach drafts, ready to review</li>
+                    <li>A tracked pipeline file, not a spreadsheet you maintain by hand</li>
+                </ul>
+                <div class="service-scope-note">Out of scope: fully autonomous sending. You stay in the loop on every message that goes out.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Proof -->
+<section class="proof" id="proof">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-tag">Proof</div>
+            <h2 class="section-title">Check it yourself</h2>
+            <p class="section-subtitle">Everything below is public. Clone it, run it, read the code.</p>
+        </div>
+        <div class="proof-grid">
+            <a href="https://github.com/mboyajeffers/financial-market-analysis" class="proof-card" target="_blank" rel="noopener">
+                <div class="proof-tag">Live-data demo</div>
+                <div class="proof-name">Aptus Capital Advisors</div>
+                <div class="proof-desc">$9.9B AUM investment firm — built with 100% live data before they committed to anything.</div>
+            </a>
+            <a href="https://github.com/mboyajeffers/financial-market-analysis" class="proof-card" target="_blank" rel="noopener">
+                <div class="proof-tag">Live-data demo</div>
+                <div class="proof-name">Multicoin Capital</div>
+                <div class="proof-desc">$1B+ AUM crypto fund — live CoinGecko data, top 20 assets by market cap.</div>
+            </a>
+            <a href="https://github.com/mboyajeffers/financial-market-analysis" class="proof-card" target="_blank" rel="noopener">
+                <div class="proof-tag">Live-data demo</div>
+                <div class="proof-name">PO&G Resources, LP</div>
+                <div class="proof-desc">500+ well energy operator — EIA production data + live commodity pricing.</div>
+            </a>
+            <a href="https://github.com/mboyajeffers/Data-Engineering-Portfolio" class="proof-card" target="_blank" rel="noopener">
+                <div class="proof-tag">Portfolio</div>
+                <div class="proof-name">Data Engineering Portfolio</div>
+                <div class="proof-desc">8 ETL pipelines, 4.3M+ verified rows, all pulling live data with green CI.</div>
+            </a>
+            <a href="/signals/" class="proof-card">
+                <div class="proof-tag">Live system</div>
+                <div class="proof-name">Morning Signals</div>
+                <div class="proof-desc">A momentum classifier running daily on 25 tickers at 78.3% accuracy.</div>
+            </a>
+            <a href="https://github.com/mboyajeffers/ai-systems-consulting" class="proof-card" target="_blank" rel="noopener">
+                <div class="proof-tag">Agent, self-used</div>
+                <div class="proof-name">Jack — Research & Outreach Agent</div>
+                <div class="proof-desc">Find → research → score → draft outreach, built for my own sales pipeline. Same pattern the agent service above is built from.</div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section id="process">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-tag">Process</div>
+            <h2 class="section-title">How it works</h2>
+        </div>
+        <div class="process-steps">
+            <div class="process-step">
+                <div class="step-number mono">01</div>
+                <h4 class="step-title">Discovery call</h4>
+                <p class="step-desc">30 minutes. What's the data, what's the pain, what does "done" look like.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number mono">02</div>
+                <h4 class="step-title">Scoped proposal</h4>
+                <p class="step-desc">Fixed price, fixed deliverable, in writing before any work starts.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number mono">03</div>
+                <h4 class="step-title">Build</h4>
+                <p class="step-desc">You get visibility into progress — not a black box for 5 days.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number mono">04</div>
+                <h4 class="step-title">Handoff</h4>
+                <p class="step-desc">Working system, documentation, and an ongoing support option if you want it.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About -->
+<section class="about" id="about">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-tag">About</div>
+            <h2 class="section-title">Who's building this</h2>
+        </div>
+        <p>I built and now run the entire data platform for a live analytics system on GCP — alone: infrastructure, CI/CD, access controls, monitoring, incident response. No platform team behind me, so I built the discipline most companies assign to one. I'm self-taught, and this is the proof.</p>
+        <p>What's public and checkable: 8 ETL pipelines, 4.3M+ verified rows from live APIs, 8+ industries, tests passing in CI. Three demo reports built with live data for real prospects before any of them signed a contract. A momentum classifier running daily on 25 tickers at 78.3% accuracy. Clone the repo and run it yourself.</p>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="section-container cta-content">
+        <h2>Have a data problem worth solving right?</h2>
+        <p>30-minute discovery call, no obligation. Bring the messy dataset or the manual process — I'll tell you honestly whether this is a fit.</p>
+        <div class="cta-ctas">
+            <a href="mailto:mboyajeffers9@gmail.com" class="btn-primary">mboyajeffers9@gmail.com</a>
+            <a href="https://linkedin.com/in/mboya-jeffers" class="btn-secondary" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-container">
+        <div class="footer-copy">© 2026 Mboya Jeffers</div>
+        <ul class="footer-links">
+            <li><a href="https://github.com/mboyajeffers" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://linkedin.com/in/mboya-jeffers" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a href="https://contra.com/mboya_jeffers_46drj2j3" target="_blank" rel="noopener">Contra</a></li>
+            <li><a href="mailto:mboyajeffers9@gmail.com">Email</a></li>
+        </ul>
+    </div>
+</footer>
+
 </body>
 </html>
