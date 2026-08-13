@@ -1,37 +1,165 @@
 {
-  "generated_at_utc": "2026-08-12T14:20:49+00:00",
-  "spy": {
-    "latest": 772.2,
-    "five_day_return_pct": 0.31
-  },
-  "vix": {
-    "latest": 14.85
-  },
-  "top_crypto": [
-    {
-      "symbol": "BTC",
-      "price_usd": 63748,
-      "change_24h_pct": -0.7
+  "generated_at_utc": "2026-08-13T00:38:17+00:00",
+  "finance": {
+    "spy": {
+      "latest": 772.49,
+      "five_day_return_pct": 0.35
     },
-    {
-      "symbol": "ETH",
-      "price_usd": 1896.27,
-      "change_24h_pct": 0.7
-    },
-    {
-      "symbol": "USDT",
-      "price_usd": 0.999174,
-      "change_24h_pct": 0
-    },
-    {
-      "symbol": "BNB",
-      "price_usd": 612.98,
-      "change_24h_pct": 0
-    },
-    {
-      "symbol": "USDC",
-      "price_usd": 0.999595,
-      "change_24h_pct": 0
+    "vix": {
+      "latest": 14.55
     }
-  ]
+  },
+  "crypto": {
+    "top_crypto": [
+      {
+        "symbol": "BTC",
+        "price_usd": 63530,
+        "change_24h_pct": -0.3
+      },
+      {
+        "symbol": "ETH",
+        "price_usd": 1879.18,
+        "change_24h_pct": -0.1
+      },
+      {
+        "symbol": "USDT",
+        "price_usd": 0.999159,
+        "change_24h_pct": 0
+      },
+      {
+        "symbol": "BNB",
+        "price_usd": 610.24,
+        "change_24h_pct": -0.6
+      },
+      {
+        "symbol": "USDC",
+        "price_usd": 0.999543,
+        "change_24h_pct": 0
+      }
+    ],
+    "top_defi_tvl": [
+      {
+        "name": "Lido",
+        "category": "Liquid Staking",
+        "tvl_usd": 17768182093,
+        "change_7d_pct": -1.31
+      },
+      {
+        "name": "Aave V3",
+        "category": "Lending",
+        "tvl_usd": 14217884208,
+        "change_7d_pct": 1.65
+      },
+      {
+        "name": "SSV Network",
+        "category": "Staking Pool",
+        "tvl_usd": 9388391740,
+        "change_7d_pct": -0.78
+      },
+      {
+        "name": "Morpho Blue",
+        "category": "Lending",
+        "tvl_usd": 7945495720,
+        "change_7d_pct": 1.52
+      },
+      {
+        "name": "WBTC",
+        "category": "Bridge",
+        "tvl_usd": 7230613544,
+        "change_7d_pct": -1.96
+      }
+    ]
+  },
+  "ecommerce": {
+    "stocks": [
+      {
+        "symbol": "AMZN",
+        "name": "Amazon",
+        "latest": 267.28,
+        "five_day_return_pct": -1.97
+      },
+      {
+        "symbol": "SHOP",
+        "name": "Shopify",
+        "latest": 150.41,
+        "five_day_return_pct": 4.28
+      },
+      {
+        "symbol": "EBAY",
+        "name": "eBay",
+        "latest": 102.31,
+        "five_day_return_pct": -7.95
+      },
+      {
+        "symbol": "ETSY",
+        "name": "Etsy",
+        "latest": 79.63,
+        "five_day_return_pct": -7.26
+      },
+      {
+        "symbol": "W",
+        "name": "Wayfair",
+        "latest": 102.94,
+        "five_day_return_pct": -4.3
+      },
+      {
+        "symbol": "CHWY",
+        "name": "Chewy",
+        "latest": 22.35,
+        "five_day_return_pct": -6.99
+      }
+    ],
+    "consumer_sentiment": {
+      "date": "2026-06-01",
+      "value": 49.5
+    }
+  },
+  "solar": {
+    "stocks": [
+      {
+        "symbol": "FSLR",
+        "name": "First Solar",
+        "latest": 226.77,
+        "five_day_return_pct": -4.24
+      },
+      {
+        "symbol": "ENPH",
+        "name": "Enphase Energy",
+        "latest": 40.77,
+        "five_day_return_pct": 4.67
+      },
+      {
+        "symbol": "SEDG",
+        "name": "SolarEdge",
+        "latest": 32.02,
+        "five_day_return_pct": -5.55
+      },
+      {
+        "symbol": "RUN",
+        "name": "Sunrun",
+        "latest": 9.84,
+        "five_day_return_pct": -6.2
+      },
+      {
+        "symbol": "ARRY",
+        "name": "Array Technologies",
+        "latest": 5.19,
+        "five_day_return_pct": -7.98
+      }
+    ],
+    "irradiance": {
+      "location": "Phoenix, AZ",
+      "unit": "MJ/m2",
+      "dates": [
+        "2026-08-12",
+        "2026-08-13",
+        "2026-08-14"
+      ],
+      "shortwave_radiation_sum": [
+        21.38,
+        23.49,
+        24.58
+      ]
+    }
+  }
 }

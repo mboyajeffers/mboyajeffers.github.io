@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Market Pulse — Mboya Jeffers</title>
-<meta name="description" content="A live market snapshot, regenerated on a schedule by a GitHub Action — SPY, VIX, and top crypto by market cap. The commit history is the proof.">
+<meta name="description" content="A live, four-industry data snapshot, regenerated on a schedule by a GitHub Action — finance, crypto/DeFi, ecommerce, and solar. The commit history is the proof.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
     .mono { font-family: 'Space Mono', monospace; }
     a { color: var(--accent-cyan); }
 
-    .wrap { max-width: 760px; margin: 0 auto; }
+    .wrap { max-width: 860px; margin: 0 auto; }
 
     .back { display: inline-block; margin-bottom: 2rem; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
     .back:hover { color: var(--accent-cyan); }
@@ -52,11 +52,16 @@
     }
     .updated .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); margin-right: 0.5rem; }
 
+    section.panel { margin-bottom: 3rem; }
+    .panel-header { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1rem; }
+    .panel-title { font-size: 1.15rem; font-weight: 700; }
+    .panel-desc { color: var(--text-muted); font-size: 0.85rem; }
+
     .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 1rem;
-        margin-bottom: 2.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .stat-card {
@@ -67,17 +72,17 @@
     }
 
     .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-    .stat-value { font-family: 'Space Mono', monospace; font-size: 1.6rem; font-weight: 700; }
+    .stat-value { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; }
     .stat-sub { font-family: 'Space Mono', monospace; font-size: 0.85rem; margin-top: 0.25rem; }
     .up { color: var(--accent-cyan); }
     .down { color: #f87171; }
 
-    table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-bottom: 0.5rem; }
     th { text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
     td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-family: 'Space Mono', monospace; font-size: 0.9rem; }
     tr:last-child td { border-bottom: none; }
 
-    .note { margin-top: 2.5rem; padding: 1.25rem; background: var(--bg-secondary); border-left: 3px solid var(--accent-cyan); border-radius: 8px; font-size: 0.9rem; color: var(--text-secondary); }
+    .note { margin-top: 1rem; padding: 1.25rem; background: var(--bg-secondary); border-left: 3px solid var(--accent-cyan); border-radius: 8px; font-size: 0.9rem; color: var(--text-secondary); }
     .note a { text-decoration: underline; }
 
     .error { color: #f87171; font-family: 'Space Mono', monospace; }
@@ -87,15 +92,31 @@
 <div class="wrap">
     <a href="/" class="back">← mboyajeffers.github.io</a>
     <h1>Market Pulse</h1>
-    <p class="subtitle">SPY, VIX, and top crypto by market cap — regenerated on a schedule by a GitHub Action, not hand-updated.</p>
+    <p class="subtitle">Finance, crypto/DeFi, ecommerce, and solar — regenerated on a schedule by a GitHub Action, not hand-updated.</p>
     <div class="updated mono" id="updated"><span class="dot"></span>Loading…</div>
 
-    <div class="grid" id="stats"></div>
+    <section class="panel">
+        <div class="panel-header"><span class="panel-title">Finance</span><span class="panel-desc mono">Yahoo Finance</span></div>
+        <div class="grid" id="finance-stats"></div>
+    </section>
 
-    <table id="crypto-table">
-        <thead><tr><th>Asset</th><th>Price (USD)</th><th>24h</th></tr></thead>
-        <tbody id="crypto-body"></tbody>
-    </table>
+    <section class="panel">
+        <div class="panel-header"><span class="panel-title">Crypto</span><span class="panel-desc mono">CoinGecko + DefiLlama</span></div>
+        <table><thead><tr><th>Asset</th><th>Price (USD)</th><th>24h</th></tr></thead><tbody id="crypto-body"></tbody></table>
+        <table><thead><tr><th>DeFi Protocol</th><th>Category</th><th>TVL</th><th>7d</th></tr></thead><tbody id="defi-body"></tbody></table>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header"><span class="panel-title">Ecommerce</span><span class="panel-desc mono">Yahoo Finance + FRED</span></div>
+        <div class="grid" id="ecommerce-stats"></div>
+        <table><thead><tr><th>Ticker</th><th>Price</th><th>5d</th></tr></thead><tbody id="ecommerce-body"></tbody></table>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header"><span class="panel-title">Solar</span><span class="panel-desc mono">Yahoo Finance + Open-Meteo</span></div>
+        <div class="grid" id="solar-stats"></div>
+        <table><thead><tr><th>Ticker</th><th>Price</th><th>5d</th></tr></thead><tbody id="solar-body"></tbody></table>
+    </section>
 
     <div class="note">
         The timestamp above is the actual proof: check <a href="https://github.com/mboyajeffers/mboyajeffers.github.io/commits/main/market-pulse/data.json" target="_blank" rel="noopener">the commit history on data.json</a> to see every update, or <a href="https://github.com/mboyajeffers/mboyajeffers.github.io/blob/main/.github/workflows/dashboard.yml" target="_blank" rel="noopener">the workflow that generates it</a>.
@@ -103,6 +124,20 @@
 </div>
 
 <script>
+function pctSub(pct, suffix) {
+    const cls = pct >= 0 ? 'up' : 'down';
+    const sign = pct >= 0 ? '+' : '';
+    return `<div class="stat-sub mono ${cls}">${sign}${pct}%${suffix ? ' ' + suffix : ''}</div>`;
+}
+
+function tickerRows(stocks) {
+    return stocks.map(s => {
+        const cls = s.five_day_return_pct >= 0 ? 'up' : 'down';
+        const sign = s.five_day_return_pct >= 0 ? '+' : '';
+        return `<tr><td>${s.name} (${s.symbol})</td><td>$${s.latest}</td><td class="${cls}">${sign}${s.five_day_return_pct}%</td></tr>`;
+    }).join('');
+}
+
 fetch('data.json?_=' + Date.now())
     .then(r => r.json())
     .then(d => {
@@ -112,29 +147,55 @@ fetch('data.json?_=' + Date.now())
         document.getElementById('updated').innerHTML =
             `<span class="dot"></span>Last updated: ${updated.toUTCString()} (${ago})`;
 
-        const spyClass = d.spy.five_day_return_pct >= 0 ? 'up' : 'down';
-        const spySign = d.spy.five_day_return_pct >= 0 ? '+' : '';
-        document.getElementById('stats').innerHTML = `
+        // Finance
+        document.getElementById('finance-stats').innerHTML = `
             <div class="stat-card">
                 <div class="stat-label">SPY</div>
-                <div class="stat-value mono">$${d.spy.latest}</div>
-                <div class="stat-sub mono ${spyClass}">${spySign}${d.spy.five_day_return_pct}% (5d)</div>
+                <div class="stat-value mono">$${d.finance.spy.latest}</div>
+                ${pctSub(d.finance.spy.five_day_return_pct, '(5d)')}
             </div>
             <div class="stat-card">
                 <div class="stat-label">VIX</div>
-                <div class="stat-value mono">${d.vix.latest}</div>
+                <div class="stat-value mono">${d.finance.vix.latest}</div>
             </div>
         `;
 
-        document.getElementById('crypto-body').innerHTML = d.top_crypto.map(c => {
+        // Crypto
+        document.getElementById('crypto-body').innerHTML = d.crypto.top_crypto.map(c => {
             const cls = c.change_24h_pct >= 0 ? 'up' : 'down';
             const sign = c.change_24h_pct >= 0 ? '+' : '';
-            return `<tr>
-                <td>${c.symbol}</td>
-                <td>$${c.price_usd.toLocaleString()}</td>
-                <td class="${cls}">${sign}${c.change_24h_pct}%</td>
-            </tr>`;
+            return `<tr><td>${c.symbol}</td><td>$${c.price_usd.toLocaleString()}</td><td class="${cls}">${sign}${c.change_24h_pct}%</td></tr>`;
         }).join('');
+        document.getElementById('defi-body').innerHTML = d.crypto.top_defi_tvl.map(p => {
+            const chg = p.change_7d_pct;
+            const cls = (chg ?? 0) >= 0 ? 'up' : 'down';
+            const sign = (chg ?? 0) >= 0 ? '+' : '';
+            const chgStr = chg === null ? '—' : `${sign}${chg}%`;
+            return `<tr><td>${p.name}</td><td>${p.category ?? '—'}</td><td>$${(p.tvl_usd/1e9).toFixed(2)}B</td><td class="${cls}">${chgStr}</td></tr>`;
+        }).join('');
+
+        // Ecommerce
+        const cs = d.ecommerce.consumer_sentiment;
+        document.getElementById('ecommerce-stats').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-label">Consumer Sentiment (FRED UMCSENT)</div>
+                <div class="stat-value mono">${cs.value}</div>
+                <div class="stat-sub mono">as of ${cs.date}</div>
+            </div>
+        `;
+        document.getElementById('ecommerce-body').innerHTML = tickerRows(d.ecommerce.stocks);
+
+        // Solar
+        const irr = d.solar.irradiance;
+        const todayIdx = 0;
+        document.getElementById('solar-stats').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-label">Solar Irradiance — ${irr.location}</div>
+                <div class="stat-value mono">${irr.shortwave_radiation_sum[todayIdx]} ${irr.unit}</div>
+                <div class="stat-sub mono">${irr.dates[todayIdx]} (Open-Meteo forecast)</div>
+            </div>
+        `;
+        document.getElementById('solar-body').innerHTML = tickerRows(d.solar.stocks);
     })
     .catch(err => {
         document.getElementById('updated').innerHTML = '<span class="error">Could not load data.json — ' + err + '</span>';
