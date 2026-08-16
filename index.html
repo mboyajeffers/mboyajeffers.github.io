@@ -7,20 +7,25 @@
 <meta name="description" content="AI Engineering Consultant delivering scoped data pipelines and embedded engineering capacity across 10 industries — production discipline, 5-day turnaround, code publicly auditable.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+    /* Palette pulled toward the AI Consulting Cockpit's calm design system
+       (app/static/css/style.css): warm graphite over near-black, one
+       restrained accent instead of a dual-color gradient, low-contrast
+       borders over glow/shadow. Kept from the original site: the richer
+       marketing-page structure (hero stats, gradient-free but still
+       present hero glow, card grids) the Cockpit itself doesn't need. */
     :root {
-        --bg-primary: #0a0e14;
-        --bg-secondary: #121820;
-        --bg-card: #1a2130;
-        --accent-cyan: #00d4aa;
-        --accent-blue: #3b82f6;
-        --text-primary: #f1f5f9;
-        --text-secondary: #94a3b8;
-        --text-muted: #64748b;
-        --border-color: #2a3441;
-        --gradient-1: linear-gradient(135deg, #00d4aa 0%, #3b82f6 100%);
-        --gradient-2: linear-gradient(135deg, #1a2130 0%, #0a0e14 100%);
+        --bg-primary: #16181d;
+        --bg-secondary: #1b1e24;
+        --bg-card: #1f232a;
+        --accent: #6fae9c;
+        --accent-hover: #82c0ae;
+        --accent-soft: rgba(111, 174, 156, 0.14);
+        --text-primary: #eceef0;
+        --text-secondary: #a7adb5;
+        --text-muted: #6c7278;
+        --border-color: #2a2e35;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,7 +33,7 @@
     html { scroll-behavior: smooth; }
 
     body {
-        font-family: 'DM Sans', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         background: var(--bg-primary);
         color: var(--text-primary);
         line-height: 1.6;
@@ -45,7 +50,7 @@
         top: 0; left: 0; right: 0;
         z-index: 1000;
         padding: 1rem 2rem;
-        background: rgba(10, 14, 20, 0.9);
+        background: rgba(22, 24, 29, 0.9);
         backdrop-filter: blur(20px);
         border-bottom: 1px solid var(--border-color);
     }
@@ -78,22 +83,21 @@
         transition: color 0.2s;
     }
 
-    .nav-links a:hover { color: var(--accent-cyan); }
+    .nav-links a:hover { color: var(--accent-hover); }
 
     .nav-cta {
-        background: var(--gradient-1);
-        color: var(--bg-primary);
+        background: var(--accent);
+        color: #0f1512;
         padding: 0.65rem 1.25rem;
         border-radius: 8px;
         text-decoration: none;
         font-weight: 600;
         font-size: 0.85rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: background 0.15s ease;
     }
 
     .nav-cta:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
+        background: var(--accent-hover);
     }
 
     /* Hero */
@@ -110,9 +114,7 @@
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background:
-            radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 170, 0.15), transparent),
-            radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59, 130, 246, 0.1), transparent);
+        background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(111, 174, 156, 0.12), transparent);
         pointer-events: none;
     }
 
@@ -142,10 +144,7 @@
     }
 
     .hero h1 .highlight {
-        background: var(--gradient-1);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--accent-hover);
     }
 
     .hero-subtitle {
@@ -163,19 +162,18 @@
     }
 
     .btn-primary {
-        background: var(--gradient-1);
-        color: var(--bg-primary);
+        background: var(--accent);
+        color: #0f1512;
         padding: 0.9rem 1.75rem;
         border-radius: 10px;
         text-decoration: none;
         font-weight: 600;
         font-size: 0.95rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: background 0.15s ease;
     }
 
     .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 212, 170, 0.35);
+        background: var(--accent-hover);
     }
 
     .btn-secondary {
@@ -187,12 +185,12 @@
         text-decoration: none;
         font-weight: 600;
         font-size: 0.95rem;
-        transition: all 0.2s;
+        transition: all 0.15s ease;
     }
 
     .btn-secondary:hover {
-        border-color: var(--accent-cyan);
-        background: rgba(0, 212, 170, 0.1);
+        border-color: var(--accent);
+        background: var(--accent-soft);
     }
 
     .hero-stats {
@@ -206,7 +204,7 @@
     .stat-value {
         font-size: 2rem;
         font-weight: 700;
-        color: var(--accent-cyan);
+        color: var(--accent);
         font-family: 'Space Mono', monospace;
     }
 
@@ -246,7 +244,7 @@
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--accent-cyan);
+        background: var(--accent);
         flex-shrink: 0;
     }
 
@@ -260,7 +258,7 @@
     .section-tag {
         font-family: 'Space Mono', monospace;
         font-size: 0.75rem;
-        color: var(--accent-cyan);
+        color: var(--accent);
         text-transform: uppercase;
         letter-spacing: 2px;
         margin-bottom: 0.75rem;
@@ -286,7 +284,7 @@
     .scope-box {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-left: 3px solid var(--accent-cyan);
+        border-left: 3px solid var(--accent);
         border-radius: 12px;
         padding: 2rem 2.25rem;
         font-size: 1.05rem;
@@ -299,8 +297,8 @@
     /* Services */
     .services-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
     }
 
     .service-card {
@@ -308,12 +306,12 @@
         border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 2.25rem;
-        transition: all 0.3s;
+        transition: background 0.15s ease, border-color 0.15s ease;
     }
 
     .service-card:hover {
-        border-color: var(--accent-cyan);
-        transform: translateY(-4px);
+        background: #262b33;
+        border-color: var(--accent);
     }
 
     .service-name {
@@ -324,7 +322,7 @@
 
     .service-price {
         font-family: 'Space Mono', monospace;
-        color: var(--accent-cyan);
+        color: var(--accent);
         font-size: 0.95rem;
         margin-bottom: 1.25rem;
     }
@@ -352,7 +350,7 @@
 
     .service-includes li::before {
         content: '✓';
-        color: var(--accent-cyan);
+        color: var(--accent);
         font-weight: 700;
         flex-shrink: 0;
     }
@@ -380,19 +378,19 @@
         padding: 1.75rem;
         text-decoration: none;
         color: inherit;
-        transition: all 0.3s;
+        transition: background 0.15s ease, border-color 0.15s ease;
         display: block;
     }
 
     .proof-card:hover {
-        border-color: var(--accent-cyan);
-        transform: translateY(-4px);
+        background: #262b33;
+        border-color: var(--accent);
     }
 
     .proof-tag {
         font-family: 'Space Mono', monospace;
         font-size: 0.7rem;
-        color: var(--accent-cyan);
+        color: var(--accent);
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 0.75rem;
@@ -422,7 +420,7 @@
     .step-number {
         font-family: 'Space Mono', monospace;
         font-size: 0.85rem;
-        color: var(--accent-cyan);
+        color: var(--accent);
         margin-bottom: 0.75rem;
     }
 
@@ -452,7 +450,7 @@
 
     /* CTA Section */
     .cta-section {
-        background: var(--gradient-2);
+        background: var(--bg-secondary);
         position: relative;
         overflow: hidden;
         text-align: center;
@@ -462,7 +460,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse 50% 80% at 50% 100%, rgba(0, 212, 170, 0.2), transparent);
+        background: radial-gradient(ellipse 50% 80% at 50% 100%, rgba(111, 174, 156, 0.14), transparent);
     }
 
     .cta-content { position: relative; z-index: 1; }
@@ -518,7 +516,7 @@
         transition: color 0.2s;
     }
 
-    .footer-links a:hover { color: var(--accent-cyan); }
+    .footer-links a:hover { color: var(--accent); }
 
     .footer-copy {
         color: var(--text-muted);
@@ -570,7 +568,7 @@
                 <div class="stat-label">Verified rows processed</div>
             </div>
             <div class="stat">
-                <div class="stat-value mono">8+</div>
+                <div class="stat-value mono">10+</div>
                 <div class="stat-label">Industries covered</div>
             </div>
             <div class="stat">
@@ -678,7 +676,7 @@
             <a href="https://github.com/mboyajeffers/Data-Engineering-Portfolio" class="proof-card" target="_blank" rel="noopener">
                 <div class="proof-tag">Portfolio</div>
                 <div class="proof-name">Data Engineering Portfolio</div>
-                <div class="proof-desc">8 ETL pipelines, 4.3M+ verified rows, all pulling live data with green CI.</div>
+                <div class="proof-desc">10 ETL pipelines, 4.3M+ verified rows, all pulling live data with green CI.</div>
             </a>
             <a href="/market-pulse/" class="proof-card">
                 <div class="proof-tag">Live, scheduled</div>
@@ -734,7 +732,7 @@
             <h2 class="section-title">What you get</h2>
         </div>
         <p>A single engineer who owns the whole data platform — infrastructure, CI/CD, access controls, monitoring, incident response — the discipline most companies split across a team, delivered as one point of contact. A scoped pipeline build ships in 5 business days; embedded capacity starts the same week.</p>
-        <p>What's public and checkable: 8 ETL pipelines, 4.3M+ verified rows from live APIs, 8+ industries, tests passing in CI. Three demo reports built with live data for real prospects before any of them signed a contract. Clone the repo and run it yourself.</p>
+        <p>What's public and checkable: 10 ETL pipelines, 4.3M+ verified rows from live APIs, 10+ industries, tests passing in CI. Three demo reports built with live data for real prospects before any of them signed a contract. Clone the repo and run it yourself.</p>
     </div>
 </section>
 
@@ -745,7 +743,8 @@
         <p>30-minute discovery call, no obligation. Bring the messy dataset or the manual process — I'll tell you honestly whether this is a fit.</p>
         <div class="cta-ctas">
             <a href="mailto:mboyajeffers9@gmail.com" class="btn-primary">mboyajeffers9@gmail.com</a>
-            <a href="https://linkedin.com/in/mboya-jeffers" class="btn-secondary" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://linkedin.com/in/mboya-jeffers-6377ba325" class="btn-secondary" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://x.com/Mboya_Jeffers" class="btn-secondary" target="_blank" rel="noopener">X</a>
         </div>
     </div>
 </section>
@@ -755,7 +754,8 @@
         <div class="footer-copy">© 2026 Mboya Jeffers</div>
         <ul class="footer-links">
             <li><a href="https://github.com/mboyajeffers" target="_blank" rel="noopener">GitHub</a></li>
-            <li><a href="https://linkedin.com/in/mboya-jeffers" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a href="https://linkedin.com/in/mboya-jeffers-6377ba325" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a href="https://x.com/Mboya_Jeffers" target="_blank" rel="noopener">X</a></li>
             <li><a href="https://contra.com/mboya_jeffers_46drj2j3" target="_blank" rel="noopener">Contra</a></li>
             <li><a href="mailto:mboyajeffers9@gmail.com">Email</a></li>
         </ul>

@@ -12,4 +12,4 @@ Live site for **Mboya Jeffers, AI Engineering Consultant** — scoped data/AI pi
 
 - **Profile:** [github.com/mboyajeffers](https://github.com/mboyajeffers)
 - **Work with me:** [ai-systems-consulting](https://github.com/mboyajeffers/ai-systems-consulting)
-- **LinkedIn:** [linkedin.com/in/mboya-jeffers](https://linkedin.com/in/mboya-jeffers)
+- **LinkedIn:** [linkedin.com/in/mboya-jeffers-6377ba325](https://linkedin.com/in/mboya-jeffers-6377ba325)
