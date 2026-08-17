@@ -1,39 +1,39 @@
 {
-  "generated_at_utc": "2026-08-14T14:15:42+00:00",
+  "generated_at_utc": "2026-08-17T13:39:46+00:00",
   "finance": {
     "spy": {
-      "latest": 778.12,
-      "five_day_return_pct": 0.63
+      "latest": 775.41,
+      "five_day_return_pct": 0.31
     },
     "vix": {
-      "latest": 14.57
+      "latest": 15.03
     }
   },
   "crypto": {
     "top_crypto": [
       {
         "symbol": "BTC",
-        "price_usd": 62575,
-        "change_24h_pct": -1.8
+        "price_usd": 63664,
+        "change_24h_pct": 0.9
       },
       {
         "symbol": "ETH",
-        "price_usd": 1866.16,
-        "change_24h_pct": -1.2
+        "price_usd": 1904.75,
+        "change_24h_pct": 1.0
       },
       {
         "symbol": "USDT",
-        "price_usd": 0.998942,
+        "price_usd": 0.999019,
         "change_24h_pct": 0
       },
       {
         "symbol": "BNB",
-        "price_usd": 603.48,
-        "change_24h_pct": -1.0
+        "price_usd": 605.1,
+        "change_24h_pct": -0.5
       },
       {
         "symbol": "USDC",
-        "price_usd": 0.999544,
+        "price_usd": 0.999529,
         "change_24h_pct": 0
       }
     ],
@@ -41,32 +41,32 @@
       {
         "name": "Lido",
         "category": "Liquid Staking",
-        "tvl_usd": 17852763031,
-        "change_7d_pct": -1.15
+        "tvl_usd": 18092376211,
+        "change_7d_pct": -0.42
       },
       {
         "name": "Aave V3",
         "category": "Lending",
-        "tvl_usd": 14068618991,
-        "change_7d_pct": -0.92
+        "tvl_usd": 14250827872,
+        "change_7d_pct": -0.07
       },
       {
         "name": "SSV Network",
         "category": "Staking Pool",
-        "tvl_usd": 9453415627,
-        "change_7d_pct": 2.99
+        "tvl_usd": 9594266632,
+        "change_7d_pct": 1.93
       },
       {
         "name": "Morpho Blue",
         "category": "Lending",
-        "tvl_usd": 7925751746,
-        "change_7d_pct": 0.19
+        "tvl_usd": 8061919391,
+        "change_7d_pct": 1.55
       },
       {
         "name": "WBTC",
         "category": "Bridge",
-        "tvl_usd": 7166533587,
-        "change_7d_pct": -3.14
+        "tvl_usd": 7253725441,
+        "change_7d_pct": -2.38
       }
     ]
   },
@@ -75,38 +75,38 @@
       {
         "symbol": "AMZN",
         "name": "Amazon",
-        "latest": 264.62,
-        "five_day_return_pct": -3.59
+        "latest": 263.1,
+        "five_day_return_pct": -5.39
       },
       {
         "symbol": "SHOP",
         "name": "Shopify",
-        "latest": 155.36,
-        "five_day_return_pct": 2.5
+        "latest": 151.51,
+        "five_day_return_pct": -2.36
       },
       {
         "symbol": "EBAY",
         "name": "eBay",
-        "latest": 104.1,
-        "five_day_return_pct": -7.04
+        "latest": 103.04,
+        "five_day_return_pct": -4.33
       },
       {
         "symbol": "ETSY",
         "name": "Etsy",
-        "latest": 80.5,
-        "five_day_return_pct": -5.9
+        "latest": 80.1,
+        "five_day_return_pct": -0.38
       },
       {
         "symbol": "W",
         "name": "Wayfair",
-        "latest": 103.37,
-        "five_day_return_pct": -3.03
+        "latest": 101.16,
+        "five_day_return_pct": -2.03
       },
       {
         "symbol": "CHWY",
         "name": "Chewy",
-        "latest": 22.25,
-        "five_day_return_pct": -5.46
+        "latest": 22.41,
+        "five_day_return_pct": -0.8
       }
     ],
     "consumer_sentiment": {
@@ -119,46 +119,46 @@
       {
         "symbol": "FSLR",
         "name": "First Solar",
-        "latest": 227.88,
-        "five_day_return_pct": -8.86
+        "latest": 222.28,
+        "five_day_return_pct": -7.13
       },
       {
         "symbol": "ENPH",
         "name": "Enphase Energy",
-        "latest": 40.85,
-        "five_day_return_pct": -2.44
+        "latest": 39.38,
+        "five_day_return_pct": -3.76
       },
       {
         "symbol": "SEDG",
         "name": "SolarEdge",
-        "latest": 32.75,
-        "five_day_return_pct": 3.12
+        "latest": 31.33,
+        "five_day_return_pct": -2.75
       },
       {
         "symbol": "RUN",
         "name": "Sunrun",
-        "latest": 10.26,
-        "five_day_return_pct": 0.59
+        "latest": 10.06,
+        "five_day_return_pct": 1.93
       },
       {
         "symbol": "ARRY",
         "name": "Array Technologies",
-        "latest": 5.2,
-        "five_day_return_pct": -6.22
+        "latest": 4.99,
+        "five_day_return_pct": -6.2
       }
     ],
     "irradiance": {
       "location": "Phoenix, AZ",
       "unit": "MJ/m2",
       "dates": [
-        "2026-08-14",
-        "2026-08-15",
-        "2026-08-16"
+        "2026-08-17",
+        "2026-08-18",
+        "2026-08-19"
       ],
       "shortwave_radiation_sum": [
-        24.76,
-        25.53,
-        19.46
+        27.2,
+        26.09,
+        26.62
       ]
     }
   }
