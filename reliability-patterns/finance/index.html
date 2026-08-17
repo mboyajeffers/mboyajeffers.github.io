@@ -172,7 +172,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1>Finance Pipeline</h1>
 <div class="badge-row">
     <img src="https://github.com/mboyajeffers/pipeline-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
-    <span class="pill">commit c09999a</span>
+    <span class="pill">commit 6079af2</span>
     <a href="https://github.com/mboyajeffers/pipeline-reliability-patterns/tree/main/pipelines/finance" target="_blank" rel="noopener">View source on GitHub →</a>
 </div>
 <div class="card"><h1 id="finance-pipeline">Finance Pipeline</h1>
@@ -198,7 +198,8 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <p><strong>Impact:</strong> any transient failure between "fetch succeeded" and "caller acknowledged the write" causes a retry to re-deliver the same day's price record. The naive ledger appends unconditionally, so the same <code>(symbol, date)</code> pair produces two rows. Any downstream aggregate keyed off row count (trade count, naive volume sum) silently doubles for that day.</p>
 <p><strong>Root cause:</strong> no identity key on ingestion. The ledger trusted "I received a record" as equivalent to "this is a new record," which is only true if the network never retries — it does.</p>
 <p><strong>Fix:</strong> <code>PriceLedger.ingest()</code> (<code>pipeline.py</code>) keys on <code>(symbol, date)</code> — the natural identity of "one closing price per symbol per day" — and treats a re-delivery of an existing key as a no-op, returning <code>False</code> instead of silently accepting it as new.</p>
-<p><strong>Prevention:</strong> <code>tests/test_idempotent_ingestion.py</code> pins this behavior with two tests: one (<code>xfail</code>, <code>strict=True</code>) that fails against the naive implementation for the documented reason, and one that asserts the fixed implementation reports <code>[True, False]</code> for a genuine-then-repeated record. If someone "simplifies" the ledger back to a plain list, CI turns red for the right reason.</p>
+<p><strong>Prevention:</strong> <code>tests/test_idempotent_ingestion.py</code> pins this behavior with three tests: one (<code>xfail</code>, <code>strict=True</code>) that fails against the naive implementation for the documented reason, one that asserts the fixed implementation reports <code>[True, False]</code> for a genuine-then-repeated record, and one added after a self-review pass (2026-08-17) that catches a second way this could still go wrong — see the addendum below.</p>
+<p><strong>Addendum, found during a scrutiny pass on this pipeline itself:</strong> the first version of the fix treated <em>any</em> second write under an existing <code>(symbol, date)</code> key as "already ingested, ignore it" — which is correct for a true retry (same value redelivered) but silently drops a genuine correction too (a different value arriving under the same key). That's the exact class of bug this pipeline exists to close, just relocated. Fixed: <code>ingest()</code> now compares the incoming value against what's already on the ledger — an exact match is a no-op (the retry case), a mismatch raises <code>ValueError</code> instead of guessing which value is right. A rejected conflict never applies, so the ledger's prior value stays intact.</p>
 <hr />
 <h2 id="issue-2-silent-currencyunit-corruption-in-portfolio-aggregation">Issue #2 — Silent currency/unit corruption in portfolio aggregation</h2>
 <p><strong>Found:</strong> while extending the pipeline to hold more than one symbol — noticed the portfolio total for a 2-line mixed-market portfolio (AAPL/USD + VOD.L/GBX) was off by roughly 20x from a manually-computed sanity check.</p>
@@ -330,14 +331,34 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <span class="sd">    Fix for issue #1 (BUILD_LOG.md): ingest() is keyed on (symbol, date), the natural</span>
 <span class="sd">    identity of "one closing price per symbol per day." A retried fetch for a record</span>
 <span class="sd">    already present is a no-op, not a duplicate row.</span>
+
+<span class="sd">    Idempotency is about tolerating a *retry of the same event*, not about silently</span>
+<span class="sd">    accepting a different value under the same key -- those are different situations</span>
+<span class="sd">    and conflating them would just move the silent-corruption risk from issue #1 to a</span>
+<span class="sd">    new one. If a second write under an existing key carries a genuinely different</span>
+<span class="sd">    close price, that's either a real correction (should be explicit) or a data-quality</span>
+<span class="sd">    problem (should be loud) -- either way, ingest() raises rather than guessing.</span>
 <span class="sd">    """</span>
 
     <span class="n">_records</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">PriceRecord</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">PriceRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Returns True if this was a new record, False if it was already ingested."""</span>
+<span class="w">        </span><span class="sd">"""Returns True if this was a new record, False if it was an exact repeat</span>
+<span class="sd">        of an already-ingested record. Raises ValueError if the same (symbol, date)</span>
+<span class="sd">        key arrives with a different close price or currency -- a conflict, not a</span>
+<span class="sd">        retry, and conflicts must never be resolved silently.</span>
+<span class="sd">        """</span>
         <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">close</span> <span class="o">!=</span> <span class="n">record</span><span class="o">.</span><span class="n">close</span> <span class="ow">or</span> <span class="n">existing</span><span class="o">.</span><span class="n">currency</span> <span class="o">!=</span> <span class="n">record</span><span class="o">.</span><span class="n">currency</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"Conflicting price for </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">date</span><span class="si">}</span><span class="s2">: "</span>
+                    <span class="sa">f</span><span class="s2">"ledger has </span><span class="si">{</span><span class="n">existing</span><span class="o">.</span><span class="n">close</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">existing</span><span class="o">.</span><span class="n">currency</span><span class="si">}</span><span class="s2">, "</span>
+                    <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">close</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">currency</span><span class="si">}</span><span class="s2">. This is not a retry -- "</span>
+                    <span class="s2">"resolve explicitly (e.g. an authorized correction path), don't "</span>
+                    <span class="s2">"silently overwrite or silently drop."</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -419,17 +440,18 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <p class="subtitle">Real <code>pytest -v</code> output from this exact commit, captured when this page was generated.
 <code>xfail</code> lines prove the bug is real against the pre-fix code; <code>PASSED</code> lines prove the fix.</p>
 <pre class="test-output">============================= test session starts ==============================
-collecting ... collected 7 items
+collecting ... collected 8 items
 
-pipelines/finance/tests/test_currency_normalization.py::test_naive_aggregation_is_wrong_by_orders_of_magnitude XFAIL [ 14%]
-pipelines/finance/tests/test_currency_normalization.py::test_normalize_price_converts_gbx_correctly PASSED [ 28%]
-pipelines/finance/tests/test_currency_normalization.py::test_normalize_price_rejects_unknown_currency_loudly PASSED [ 42%]
-pipelines/finance/tests/test_currency_normalization.py::test_portfolio_value_is_currency_correct PASSED [ 57%]
-pipelines/finance/tests/test_idempotent_ingestion.py::test_naive_double_counts_on_retry XFAIL [ 71%]
-pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_is_idempotent_on_retry PASSED [ 85%]
-pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_accepts_genuinely_new_records PASSED [100%]
+pipelines/finance/tests/test_currency_normalization.py::test_naive_aggregation_is_wrong_by_orders_of_magnitude XFAIL [ 12%]
+pipelines/finance/tests/test_currency_normalization.py::test_normalize_price_converts_gbx_correctly PASSED [ 25%]
+pipelines/finance/tests/test_currency_normalization.py::test_normalize_price_rejects_unknown_currency_loudly PASSED [ 37%]
+pipelines/finance/tests/test_currency_normalization.py::test_portfolio_value_is_currency_correct PASSED [ 50%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_naive_double_counts_on_retry XFAIL [ 62%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_is_idempotent_on_retry PASSED [ 75%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_accepts_genuinely_new_records PASSED [ 87%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_raises_on_a_genuine_value_conflict_instead_of_silently_dropping_it PASSED [100%]
 
-========================= 5 passed, 2 xfailed in 0.17s =========================</pre>
+========================= 6 passed, 2 xfailed in 0.28s =========================</pre>
 
 </main>
 <footer>

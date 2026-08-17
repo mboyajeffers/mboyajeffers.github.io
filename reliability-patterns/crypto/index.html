@@ -172,7 +172,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1>Crypto Pipeline</h1>
 <div class="badge-row">
     <img src="https://github.com/mboyajeffers/pipeline-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
-    <span class="pill">commit c09999a</span>
+    <span class="pill">commit 6079af2</span>
     <a href="https://github.com/mboyajeffers/pipeline-reliability-patterns/tree/main/pipelines/crypto" target="_blank" rel="noopener">View source on GitHub →</a>
 </div>
 <div class="card"><h1 id="crypto-pipeline">Crypto Pipeline</h1>
@@ -369,7 +369,11 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
                 <span class="n">flush</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
                 <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">flush</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>  <span class="c1"># final partial chunk</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 — the stream itself raised (e.g. paginated fetch broke)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 — reading the next record OR flushing the current chunk</span>
+        <span class="c1"># can fail (e.g. the paginated fetch breaks mid-stream, or a record in the</span>
+        <span class="c1"># current chunk is malformed); either way, only the in-flight chunk is at</span>
+        <span class="c1"># risk, and any of that chunk already appended to `processed` before the</span>
+        <span class="c1"># failure is kept, not discarded.</span>
         <span class="n">error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">processed</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed</span><span class="p">),</span> <span class="n">error</span>
@@ -419,7 +423,7 @@ pipelines/crypto/tests/test_dead_letter_queue.py::test_naive_batch_aborts_entire
 pipelines/crypto/tests/test_dead_letter_queue.py::test_fixed_batch_isolates_failure_to_dlq PASSED [ 83%]
 pipelines/crypto/tests/test_dead_letter_queue.py::test_replay_recovers_once_the_transient_failure_clears PASSED [100%]
 
-========================= 4 passed, 2 xfailed in 0.10s =========================</pre>
+========================= 4 passed, 2 xfailed in 0.14s =========================</pre>
 
 </main>
 <footer>

@@ -172,7 +172,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1>Ecommerce Pipeline</h1>
 <div class="badge-row">
     <img src="https://github.com/mboyajeffers/pipeline-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
-    <span class="pill">commit c09999a</span>
+    <span class="pill">commit 6079af2</span>
     <a href="https://github.com/mboyajeffers/pipeline-reliability-patterns/tree/main/pipelines/ecommerce" target="_blank" rel="noopener">View source on GitHub →</a>
 </div>
 <div class="card"><h1 id="ecommerce-pipeline">Ecommerce Pipeline</h1>
@@ -199,6 +199,7 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <p><strong>Root cause:</strong> the pipeline treated "received a record" as equivalent to "record is safe to compute on." Those are different claims, and only the second one should ever reach a KPI.</p>
 <p><strong>Fix:</strong> <code>validate_catalog()</code> (<code>pipeline.py</code>) partitions incoming records into <code>valid</code> and <code>rejected</code> (each rejection carrying a specific reason: missing/empty title, non-numeric price, negative price). <code>average_price()</code> computes only over <code>valid</code> and reports both counts, so a KPI consumer can see at a glance how much of the feed was actually usable.</p>
 <p><strong>Prevention:</strong> <code>tests/test_validation_gate.py</code> — an <code>xfail</code> test proving the naive average crashes on the malformed catalog, plus tests confirming the validation gate's partition and reasons are exactly right, and that the KPI is computed only over the valid subset.</p>
+<p><strong>Addendum, found during a scrutiny pass on this pipeline itself (2026-08-17):</strong> the first version of <code>validate_record()</code> checked <code>isinstance(price, (int, float))</code> and <code>price &lt; 0</code> — both of which <code>float('nan')</code> and <code>float('inf')</code> pass through. NaN in particular is the classic silent-corruption value: it's a legitimate <code>float</code>, and <code>NaN &lt; 0</code> evaluates <code>False</code> (NaN compares false to everything, including itself), so neither check catches it, and any sum it touches becomes NaN with no exception raised. Fixed with an explicit <code>math.isfinite()</code> check, added to <code>validate_record()</code> before the negativity check. New test: <code>test_validation_gate_rejects_nan_and_inf_prices</code>.</p>
 <hr />
 <h2 id="issue-6-order-updates-have-no-history">Issue #6 — Order updates have no history</h2>
 <p><strong>Found:</strong> while modeling a price correction on an existing order (a common, mundane operation — a pricing error gets fixed after the order is placed) and asking "what was this order's price <em>before</em> the correction, and when did it change?"</p>
@@ -280,6 +281,7 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 
@@ -307,6 +309,11 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
         <span class="k">return</span> <span class="s2">"missing or empty title"</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"price is not numeric (got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">price</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">price</span><span class="si">!r}</span><span class="s2">)"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">price</span><span class="p">):</span>
+        <span class="c1"># NaN and +/-inf both pass a naive `isinstance(price, float)` check, and NaN</span>
+        <span class="c1"># passes a naive `price &lt; 0` check too (NaN compares False to everything,</span>
+        <span class="c1"># including itself) -- either one silently poisons any downstream sum.</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"price is not finite (</span><span class="si">{</span><span class="n">price</span><span class="si">!r}</span><span class="s2">)"</span>
     <span class="k">if</span> <span class="n">price</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"price is negative (</span><span class="si">{</span><span class="n">price</span><span class="si">!r}</span><span class="s2">)"</span>
     <span class="k">return</span> <span class="kc">None</span>
@@ -400,16 +407,17 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <p class="subtitle">Real <code>pytest -v</code> output from this exact commit, captured when this page was generated.
 <code>xfail</code> lines prove the bug is real against the pre-fix code; <code>PASSED</code> lines prove the fix.</p>
 <pre class="test-output">============================= test session starts ==============================
-collecting ... collected 6 items
+collecting ... collected 7 items
 
-pipelines/ecommerce/tests/test_audit_trail.py::test_naive_store_has_no_history XFAIL [ 16%]
-pipelines/ecommerce/tests/test_audit_trail.py::test_fixed_store_records_every_change PASSED [ 33%]
-pipelines/ecommerce/tests/test_audit_trail.py::test_fixed_store_ignores_no_op_updates PASSED [ 50%]
-pipelines/ecommerce/tests/test_validation_gate.py::test_naive_average_crashes_on_malformed_record XFAIL [ 66%]
-pipelines/ecommerce/tests/test_validation_gate.py::test_validate_catalog_separates_valid_from_rejected PASSED [ 83%]
-pipelines/ecommerce/tests/test_validation_gate.py::test_average_price_computes_only_over_valid_records PASSED [100%]
+pipelines/ecommerce/tests/test_audit_trail.py::test_naive_store_has_no_history XFAIL [ 14%]
+pipelines/ecommerce/tests/test_audit_trail.py::test_fixed_store_records_every_change PASSED [ 28%]
+pipelines/ecommerce/tests/test_audit_trail.py::test_fixed_store_ignores_no_op_updates PASSED [ 42%]
+pipelines/ecommerce/tests/test_validation_gate.py::test_naive_average_crashes_on_malformed_record XFAIL [ 57%]
+pipelines/ecommerce/tests/test_validation_gate.py::test_validate_catalog_separates_valid_from_rejected PASSED [ 71%]
+pipelines/ecommerce/tests/test_validation_gate.py::test_average_price_computes_only_over_valid_records PASSED [ 85%]
+pipelines/ecommerce/tests/test_validation_gate.py::test_validation_gate_rejects_nan_and_inf_prices PASSED [100%]
 
-========================= 4 passed, 2 xfailed in 0.11s =========================</pre>
+========================= 5 passed, 2 xfailed in 0.15s =========================</pre>
 
 </main>
 <footer>
