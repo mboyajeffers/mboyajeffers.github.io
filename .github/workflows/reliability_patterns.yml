@@ -1,0 +1,36 @@
+name: Update Reliability Patterns Pages
+
+on:
+  schedule:
+    # 14:00 UTC daily -- picks up any update pushed to pipeline-reliability-patterns
+    # within a day; workflow_dispatch below gives an immediate manual refresh too.
+    - cron: '0 14 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-reliability-patterns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install markdown pygments pytest requests
+
+      - name: Generate reliability-patterns pages from the live source repo
+        run: python3 scripts/generate_reliability_patterns.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reliability-patterns/
+          git diff --staged --quiet || git commit -m "Update reliability-patterns pages $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push

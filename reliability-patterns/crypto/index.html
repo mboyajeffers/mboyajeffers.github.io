@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Pipeline — Reliability Patterns</title>
+<meta name="description" content="Real production failure modes found, fixed, and test-pinned in a crypto data pipeline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-primary: #16181d;
+    --bg-secondary: #1b1e24;
+    --bg-card: #1f232a;
+    --accent: #6fae9c;
+    --accent-hover: #82c0ae;
+    --accent-soft: rgba(111, 174, 156, 0.14);
+    --border: #2a2f38;
+    --text: #e6e8eb;
+    --text-dim: #9aa1ab;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: var(--bg-primary);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+}
+.mono { font-family: 'Space Mono', monospace; }
+nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 2rem; border-bottom: 1px solid var(--border);
+    max-width: 960px; margin: 0 auto;
+}
+nav a { color: var(--text); text-decoration: none; font-weight: 600; }
+nav .nav-links a { color: var(--text-dim); margin-left: 1.5rem; font-weight: 500; font-size: 0.9rem; }
+nav .nav-links a:hover { color: var(--accent-hover); }
+main { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+h2 { font-size: 1.35rem; margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.75rem; }
+h3 { font-size: 1.05rem; color: var(--accent-hover); }
+a { color: var(--accent-hover); }
+.subtitle { color: var(--text-dim); margin-bottom: 1.5rem; }
+.badge-row { display: flex; gap: 0.75rem; align-items: center; margin: 1rem 0 2rem; flex-wrap: wrap; }
+.badge-row img { height: 20px; }
+.pill {
+    display: inline-block; background: var(--accent-soft); color: var(--accent-hover);
+    border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+}
+.card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.5rem; margin: 1.25rem 0;
+}
+.card a.card-link { text-decoration: none; color: inherit; display: block; }
+.card a.card-link:hover { border-color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+th { color: var(--text-dim); font-weight: 600; }
+code { font-family: 'Space Mono', monospace; background: var(--bg-secondary); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9em; }
+pre { overflow-x: auto; border-radius: 8px; padding: 1rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+.test-output {
+    background: #0d0f12; border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-family: 'Space Mono', monospace; font-size: 0.82rem;
+    color: #c7d0da; white-space: pre-wrap;
+}
+.test-output .pass { color: #7ee0a8; }
+footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; }
+footer a { color: var(--text-dim); margin: 0 0.5rem; }
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #49483e }
+.highlight { background: #272822; color: #F8F8F2 }
+.highlight .c { color: #959077 } /* Comment */
+.highlight .err { color: #ED007E; background-color: #1E0010 } /* Error */
+.highlight .esc { color: #F8F8F2 } /* Escape */
+.highlight .g { color: #F8F8F2 } /* Generic */
+.highlight .k { color: #66D9EF } /* Keyword */
+.highlight .l { color: #AE81FF } /* Literal */
+.highlight .n { color: #F8F8F2 } /* Name */
+.highlight .o { color: #FF4689 } /* Operator */
+.highlight .x { color: #F8F8F2 } /* Other */
+.highlight .p { color: #F8F8F2 } /* Punctuation */
+.highlight .ch { color: #959077 } /* Comment.Hashbang */
+.highlight .cm { color: #959077 } /* Comment.Multiline */
+.highlight .cp { color: #959077 } /* Comment.Preproc */
+.highlight .cpf { color: #959077 } /* Comment.PreprocFile */
+.highlight .c1 { color: #959077 } /* Comment.Single */
+.highlight .cs { color: #959077 } /* Comment.Special */
+.highlight .gd { color: #FF4689 } /* Generic.Deleted */
+.highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+.highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #F8F8F2 } /* Generic.Error */
+.highlight .gh { color: #F8F8F2 } /* Generic.Heading */
+.highlight .gi { color: #A6E22E } /* Generic.Inserted */
+.highlight .go { color: #66D9EF } /* Generic.Output */
+.highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #959077 } /* Generic.Subheading */
+.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
+.highlight .kc { color: #66D9EF } /* Keyword.Constant */
+.highlight .kd { color: #66D9EF } /* Keyword.Declaration */
+.highlight .kn { color: #FF4689 } /* Keyword.Namespace */
+.highlight .kp { color: #66D9EF } /* Keyword.Pseudo */
+.highlight .kr { color: #66D9EF } /* Keyword.Reserved */
+.highlight .kt { color: #66D9EF } /* Keyword.Type */
+.highlight .ld { color: #E6DB74 } /* Literal.Date */
+.highlight .m { color: #AE81FF } /* Literal.Number */
+.highlight .s { color: #E6DB74 } /* Literal.String */
+.highlight .na { color: #A6E22E } /* Name.Attribute */
+.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
+.highlight .nc { color: #A6E22E } /* Name.Class */
+.highlight .no { color: #66D9EF } /* Name.Constant */
+.highlight .nd { color: #A6E22E } /* Name.Decorator */
+.highlight .ni { color: #F8F8F2 } /* Name.Entity */
+.highlight .ne { color: #A6E22E } /* Name.Exception */
+.highlight .nf { color: #A6E22E } /* Name.Function */
+.highlight .nl { color: #F8F8F2 } /* Name.Label */
+.highlight .nn { color: #F8F8F2 } /* Name.Namespace */
+.highlight .nx { color: #A6E22E } /* Name.Other */
+.highlight .py { color: #F8F8F2 } /* Name.Property */
+.highlight .nt { color: #FF4689 } /* Name.Tag */
+.highlight .nv { color: #F8F8F2 } /* Name.Variable */
+.highlight .ow { color: #FF4689 } /* Operator.Word */
+.highlight .pm { color: #F8F8F2 } /* Punctuation.Marker */
+.highlight .w { color: #F8F8F2 } /* Text.Whitespace */
+.highlight .mb { color: #AE81FF } /* Literal.Number.Bin */
+.highlight .mf { color: #AE81FF } /* Literal.Number.Float */
+.highlight .mh { color: #AE81FF } /* Literal.Number.Hex */
+.highlight .mi { color: #AE81FF } /* Literal.Number.Integer */
+.highlight .mo { color: #AE81FF } /* Literal.Number.Oct */
+.highlight .sa { color: #E6DB74 } /* Literal.String.Affix */
+.highlight .sb { color: #E6DB74 } /* Literal.String.Backtick */
+.highlight .sc { color: #E6DB74 } /* Literal.String.Char */
+.highlight .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+.highlight .sd { color: #E6DB74 } /* Literal.String.Doc */
+.highlight .s2 { color: #E6DB74 } /* Literal.String.Double */
+.highlight .se { color: #AE81FF } /* Literal.String.Escape */
+.highlight .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+.highlight .si { color: #E6DB74 } /* Literal.String.Interpol */
+.highlight .sx { color: #E6DB74 } /* Literal.String.Other */
+.highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
+.highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
+.highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
+.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #A6E22E } /* Name.Function.Magic */
+.highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
+.highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
+.highlight .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+.highlight .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+.highlight .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+</style>
+</head>
+<body>
+<nav>
+    <a href="/">Mboya Jeffers</a>
+    <ul class="nav-links" style="list-style:none; display:flex; margin:0; padding:0;">
+        <li><a href="/reliability-patterns/">Reliability Patterns</a></li>
+        <li><a href="/market-pulse/">Market Pulse</a></li>
+        <li><a href="https://github.com/mboyajeffers/pipeline-reliability-patterns" target="_blank" rel="noopener">Source</a></li>
+    </ul>
+</nav>
+<main>
+
+<p><a href="/reliability-patterns/">&larr; All pipelines</a></p>
+<h1>Crypto Pipeline</h1>
+<div class="badge-row">
+    <img src="https://github.com/mboyajeffers/pipeline-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
+    <span class="pill">commit c09999a</span>
+    <a href="https://github.com/mboyajeffers/pipeline-reliability-patterns/tree/main/pipelines/crypto" target="_blank" rel="noopener">View source on GitHub →</a>
+</div>
+<div class="card"><h1 id="crypto-pipeline">Crypto Pipeline</h1>
+<p><strong>What it does:</strong> fetches spot prices for a batch of coins and processes a historical price stream (live source: CoinGecko's public <code>simple/price</code> endpoint, no API key).</p>
+<p><strong>Architecture, in 5 lines:</strong> <code>fetch_prices_with_dlq()</code> fetches each coin independently → a per-coin failure is routed to a <code>DeadLetterQueue</code>, not raised → <code>replay_dlq()</code> retries only the dead-lettered coins → separately, <code>process_chunked()</code> consumes a historical-price stream in bounded chunks so a mid-stream failure loses at most one chunk, not the whole run.</p>
+<p><strong>What this proves — see <code>BUILD_LOG.md</code> for the full postmortem on each:</strong>
+1. <strong>Dead-letter queue + replay</strong> — one failing coin never takes down the rest of the batch, and the failure is recorded, not silently dropped.
+2. <strong>Chunked processing at scale</strong> — a stream that fails partway through preserves everything processed before the failure, and reports exactly how far it got.</p>
+<p><strong>Run it yourself:</strong></p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>../../requirements.txt
+pytest<span class="w"> </span>tests/<span class="w"> </span>-v<span class="w">          </span><span class="c1"># deterministic, no network required</span>
+python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span class="w"> </span><span class="c1"># hits the real CoinGecko endpoint</span>
+</code></pre></div>
+
+<p><strong>What this is / isn't:</strong> a small demonstration pipeline built to make two specific, realistic production failure modes concrete and testable — not a trading system, not investment advice, not a claim that this is any specific employer's actual architecture.</p></div>
+
+<h2>Build Log — the postmortem</h2>
+<h1 id="build-log-crypto-pipeline">Build Log — Crypto Pipeline</h1>
+<p>Postmortem-style log (Issue / Impact / Root Cause / Fix / Prevention) — see <code>../../EVALUATION_RUBRIC.md</code>.</p>
+<hr />
+<h2 id="issue-3-one-failed-coin-fetch-aborts-the-entire-batch-silently">Issue #3 — One failed coin fetch aborts the entire batch, silently</h2>
+<p><strong>Found:</strong> while testing behavior when a single coin ID in a multi-coin batch fails (a genuinely invalid ID, or a transient rate-limit/timeout from CoinGecko on just that request).</p>
+<p><strong>Impact:</strong> the naive batch fetch has no per-item failure isolation — one bad coin ID raises and the whole batch call fails, discarding results for every <em>other</em> coin that had already succeeded. There's also no record that a failure happened at all once the exception is caught somewhere upstream (or crashes the run if it isn't).</p>
+<p><strong>Root cause:</strong> the loop had no failure boundary at the per-item level — only at the batch level, which is the wrong granularity for a batch of independent fetches.</p>
+<p><strong>Fix:</strong> <code>fetch_prices_with_dlq()</code> (<code>pipeline.py</code>) wraps each coin's fetch individually. A failure routes that coin to a <code>DeadLetterQueue</code> with the error and an attempt count, and the loop continues — the rest of the batch is unaffected. <code>replay_dlq()</code> retries just the dead-lettered coins later, removing them from the DLQ on success.</p>
+<p><strong>Prevention:</strong> <code>tests/test_dead_letter_queue.py</code> — an <code>xfail</code> test proving the naive batch loses a successful result (<code>bitcoin</code>) when a later item (<code>ethereum</code>) fails, plus tests confirming the DLQ isolates the failure correctly and that replay recovers once the simulated transient condition clears.</p>
+<hr />
+<h2 id="issue-4-fully-materializing-a-large-stream-before-processing-loses-all-progress-on-a-mid-stream-failure">Issue #4 — Fully materializing a large stream before processing loses all progress on a mid-stream failure</h2>
+<p><strong>Found:</strong> while stress-testing the pipeline against a longer synthetic historical-price backfill and simulating the kind of mid-fetch failure a real paginated API produces on a large pull.</p>
+<p><strong>Impact:</strong> the naive processor calls <code>list(stream)</code> before doing anything else — the entire stream must be read successfully before a single record is usable. If the stream fails at record 350 of a 1,000-record backfill, all 350 already-produced records are discarded along with the failure; there's no partial result to inspect or resume from.</p>
+<p><strong>Root cause:</strong> processing was written as "read everything, then process everything" instead of "process as it arrives" — a reasonable simplification for a small, reliable stream, but not for the kind of large, occasionally-flaky stream this pipeline is meant to survive.</p>
+<p><strong>Fix:</strong> <code>process_chunked()</code> (<code>pipeline.py</code>) processes the stream in bounded chunks (default 100 records), flushing each completed chunk before reading the next. A failure mid-stream loses at most the current in-flight chunk, not everything already processed, and the caller gets back exactly how many records were processed and why it stopped.</p>
+<p><strong>Prevention:</strong> <code>tests/test_chunked_processing.py</code> — an <code>xfail</code> test proving the naive version returns nothing at all on a mid-stream failure (it can't — it never got the chance to return), plus a test confirming the chunked version preserves the 3 already-completed chunks (300 of 1,000 records) when the 4th chunk hits the same simulated failure.</p>
+<p><strong>Note on framing:</strong> the benefit demonstrated and tested here is partial-progress preservation and bounded blast radius on failure — the more concrete, testable version of "process in chunks so a big pull doesn't take everything down with it." A literal peak-memory reduction claim isn't made or tested; that's a real secondary benefit of chunking but isn't what this test suite proves, and this log doesn't claim more than what's actually verified.</p>
+<hr />
+<h2 id="version-history">Version History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0.0</td>
+<td>2026-08-17</td>
+<td>Initial build — 2 issues logged, fixed, and test-pinned</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Before → After</h2>
+<p class="subtitle">The pre-fix code is kept in the repo (not deleted) so this is checkable, not just asserted.</p>
+<h3>Before — <code>pipelines/crypto/before/fetch_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;BEFORE — issue #3: one failed coin fetch aborts the entire batch, and nothing</span>
+<span class="sd">records that it happened. Kept intact so BUILD_LOG.md&#39;s claim is checkable.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_prices_naive</span><span class="p">(</span><span class="n">coin_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">fetch_one</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">coin_id</span> <span class="ow">in</span> <span class="n">coin_ids</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_one</span><span class="p">(</span><span class="n">coin_id</span><span class="p">)</span>  <span class="c1"># no try/except — one bad id kills the whole batch</span>
+    <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+<h3>Before — <code>pipelines/crypto/before/process_all_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;BEFORE — issue #4: fully materializes the input stream before processing anything.</span>
+<span class="sd">If the stream fails partway through (a paginated fetch times out, a long-running</span>
+<span class="sd">backfill hits a bad record), everything already read is discarded — there is no</span>
+<span class="sd">partial result. Kept intact so BUILD_LOG.md&#39;s claim is checkable.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">process_all_in_memory</span><span class="p">(</span><span class="n">stream</span><span class="p">:</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>  <span class="c1"># &lt;- realizes the ENTIRE stream before any processing starts;</span>
+    <span class="c1">#    if the stream raises on item 4,000 of a 10,000-item backfill, everything</span>
+    <span class="c1">#    already produced by the stream is lost, not just the failing item.</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;price&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span><span class="p">]</span>
+</pre></div>
+
+<h3>After — <code>pipelines/crypto/pipeline.py</code> (the fix, current on <code>main</code>)</h3>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Crypto pipeline — multi-coin price batch fetch + historical-stream aggregation.</span>
+
+<span class="sd">Same I/O/logic separation as the finance pipeline (see its module docstring) —</span>
+<span class="sd">unit tests exercise the logic deterministically; `python pipeline.py --live` hits</span>
+<span class="sd">the real CoinGecko public API (no key required).</span>
+
+<span class="sd">Two production issues are fixed here; see BUILD_LOG.md for the full postmortem on each:</span>
+<span class="sd">  3. Dead-letter queue + replay (fetch_prices_with_dlq, replay_dlq)</span>
+<span class="sd">  4. Chunked processing at scale (process_chunked)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">COINGECKO_SIMPLE_PRICE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://api.coingecko.com/api/v3/simple/price&quot;</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeadLetter</span><span class="p">:</span>
+    <span class="n">coin_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">error</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeadLetterQueue</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix for issue #3: a place failed fetches go, instead of vanishing. Nothing</span>
+<span class="sd">    that failed to ingest is ever silently absent from the run&#39;s record — it&#39;s either</span>
+<span class="sd">    in the results or it&#39;s in the DLQ with a reason.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">entries</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DeadLetter</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coin_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">coin_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]</span><span class="o">.</span><span class="n">attempts</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">DeadLetter</span><span class="p">(</span><span class="n">coin_id</span><span class="o">=</span><span class="n">coin_id</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coin_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">coin_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">coin_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_prices_with_dlq</span><span class="p">(</span>
+    <span class="n">coin_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">fetch_one</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">dlq</span><span class="p">:</span> <span class="n">DeadLetterQueue</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetches each coin independently. A failure on one coin is routed to the DLQ</span>
+<span class="sd">    and does not abort the rest of the batch — the fix for issue #3.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">coin_id</span> <span class="ow">in</span> <span class="n">coin_ids</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_one</span><span class="p">(</span><span class="n">coin_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 — this is the DLQ boundary by design</span>
+            <span class="n">dlq</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coin_id</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">replay_dlq</span><span class="p">(</span><span class="n">dlq</span><span class="p">:</span> <span class="n">DeadLetterQueue</span><span class="p">,</span> <span class="n">fetch_one</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retries every coin currently in the DLQ. Coins that succeed on replay are</span>
+<span class="sd">    removed from the DLQ and returned; coins that fail again stay in the DLQ with</span>
+<span class="sd">    an incremented attempt count.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">recovered</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">coin_id</span> <span class="ow">in</span> <span class="n">dlq</span><span class="o">.</span><span class="n">coin_ids</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">recovered</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_one</span><span class="p">(</span><span class="n">coin_id</span><span class="p">)</span>
+            <span class="n">dlq</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">coin_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+            <span class="n">dlq</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coin_id</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recovered</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">process_chunked</span><span class="p">(</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix for issue #4: processes a potentially-large record stream in bounded</span>
+<span class="sd">    chunks instead of materializing it all at once. Returns (prices_processed_so_far,</span>
+<span class="sd">    count_processed, error_message_or_None) — a chunk that fails does not discard the</span>
+<span class="sd">    work already completed in prior chunks, and the caller learns exactly how far</span>
+<span class="sd">    the run got instead of losing everything.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">processed</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">chunk</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">flush</span><span class="p">(</span><span class="n">chunk</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="n">processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;price&quot;</span><span class="p">])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+                <span class="n">flush</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">flush</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>  <span class="c1"># final partial chunk</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 — the stream itself raised (e.g. paginated fetch broke)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">processed</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed</span><span class="p">),</span> <span class="n">error</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_one_live</span><span class="p">(</span><span class="n">coin_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="n">COINGECKO_SIMPLE_PRICE_URL</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="n">coin_id</span><span class="p">,</span> <span class="s2">&quot;vs_currencies&quot;</span><span class="p">:</span> <span class="s2">&quot;usd&quot;</span><span class="p">},</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">coin_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">or</span> <span class="s2">&quot;usd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="n">coin_id</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CoinGecko returned no USD price for </span><span class="si">{</span><span class="n">coin_id</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">coin_id</span><span class="p">][</span><span class="s2">&quot;usd&quot;</span><span class="p">]</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+    <span class="k">if</span> <span class="s2">&quot;--live&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+        <span class="n">dlq</span> <span class="o">=</span> <span class="n">DeadLetterQueue</span><span class="p">()</span>
+        <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bitcoin&quot;</span><span class="p">,</span> <span class="s2">&quot;ethereum&quot;</span><span class="p">,</span> <span class="s2">&quot;not-a-real-coin-id&quot;</span><span class="p">]</span>  <span class="c1"># last one deliberately fails</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">fetch_prices_with_dlq</span><span class="p">(</span><span class="n">coins</span><span class="p">,</span> <span class="n">fetch_one_live</span><span class="p">,</span> <span class="n">dlq</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fetched:&quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dead-lettered:&quot;</span><span class="p">,</span> <span class="n">dlq</span><span class="o">.</span><span class="n">coin_ids</span><span class="p">())</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">recovered</span> <span class="o">=</span> <span class="n">replay_dlq</span><span class="p">(</span><span class="n">dlq</span><span class="p">,</span> <span class="n">fetch_one_live</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recovered on replay:&quot;</span><span class="p">,</span> <span class="n">recovered</span><span class="p">,</span> <span class="s2">&quot;(expected empty — that coin id is genuinely invalid)&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run with --live to hit the real CoinGecko endpoint. &quot;</span>
+              <span class="s2">&quot;See tests/ for deterministic unit tests of the DLQ/chunking logic.&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<h2>Test output — proof, not a claim</h2>
+<p class="subtitle">Real <code>pytest -v</code> output from this exact commit, captured when this page was generated.
+<code>xfail</code> lines prove the bug is real against the pre-fix code; <code>PASSED</code> lines prove the fix.</p>
+<pre class="test-output">============================= test session starts ==============================
+collecting ... collected 6 items
+
+pipelines/crypto/tests/test_chunked_processing.py::test_naive_loses_all_progress_on_mid_stream_failure XFAIL [ 16%]
+pipelines/crypto/tests/test_chunked_processing.py::test_chunked_preserves_progress_made_before_the_failure PASSED [ 33%]
+pipelines/crypto/tests/test_chunked_processing.py::test_chunked_processes_a_clean_stream_fully PASSED [ 50%]
+pipelines/crypto/tests/test_dead_letter_queue.py::test_naive_batch_aborts_entirely_on_one_failure XFAIL [ 66%]
+pipelines/crypto/tests/test_dead_letter_queue.py::test_fixed_batch_isolates_failure_to_dlq PASSED [ 83%]
+pipelines/crypto/tests/test_dead_letter_queue.py::test_replay_recovers_once_the_transient_failure_clears PASSED [100%]
+
+========================= 4 passed, 2 xfailed in 0.06s =========================</pre>
+
+</main>
+<footer>
+    <div>© 2026 Mboya Jeffers</div>
+    <div style="margin-top:0.5rem;">
+        <a href="https://github.com/mboyajeffers" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/mboya-jeffers-6377ba325" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://x.com/Mboya_Jeffers" target="_blank" rel="noopener">X</a>
+        <a href="mailto:mboyajeffers9@gmail.com">Email</a>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Pipeline — Reliability Patterns</title>
+<meta name="description" content="Real production failure modes found, fixed, and test-pinned in a finance data pipeline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-primary: #16181d;
+    --bg-secondary: #1b1e24;
+    --bg-card: #1f232a;
+    --accent: #6fae9c;
+    --accent-hover: #82c0ae;
+    --accent-soft: rgba(111, 174, 156, 0.14);
+    --border: #2a2f38;
+    --text: #e6e8eb;
+    --text-dim: #9aa1ab;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: var(--bg-primary);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+}
+.mono { font-family: 'Space Mono', monospace; }
+nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 2rem; border-bottom: 1px solid var(--border);
+    max-width: 960px; margin: 0 auto;
+}
+nav a { color: var(--text); text-decoration: none; font-weight: 600; }
+nav .nav-links a { color: var(--text-dim); margin-left: 1.5rem; font-weight: 500; font-size: 0.9rem; }
+nav .nav-links a:hover { color: var(--accent-hover); }
+main { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+h2 { font-size: 1.35rem; margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.75rem; }
+h3 { font-size: 1.05rem; color: var(--accent-hover); }
+a { color: var(--accent-hover); }
+.subtitle { color: var(--text-dim); margin-bottom: 1.5rem; }
+.badge-row { display: flex; gap: 0.75rem; align-items: center; margin: 1rem 0 2rem; flex-wrap: wrap; }
+.badge-row img { height: 20px; }
+.pill {
+    display: inline-block; background: var(--accent-soft); color: var(--accent-hover);
+    border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+}
+.card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.5rem; margin: 1.25rem 0;
+}
+.card a.card-link { text-decoration: none; color: inherit; display: block; }
+.card a.card-link:hover { border-color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+th { color: var(--text-dim); font-weight: 600; }
+code { font-family: 'Space Mono', monospace; background: var(--bg-secondary); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9em; }
+pre { overflow-x: auto; border-radius: 8px; padding: 1rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+.test-output {
+    background: #0d0f12; border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-family: 'Space Mono', monospace; font-size: 0.82rem;
+    color: #c7d0da; white-space: pre-wrap;
+}
+.test-output .pass { color: #7ee0a8; }
+footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; }
+footer a { color: var(--text-dim); margin: 0 0.5rem; }
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #49483e }
+.highlight { background: #272822; color: #F8F8F2 }
+.highlight .c { color: #959077 } /* Comment */
+.highlight .err { color: #ED007E; background-color: #1E0010 } /* Error */
+.highlight .esc { color: #F8F8F2 } /* Escape */
+.highlight .g { color: #F8F8F2 } /* Generic */
+.highlight .k { color: #66D9EF } /* Keyword */
+.highlight .l { color: #AE81FF } /* Literal */
+.highlight .n { color: #F8F8F2 } /* Name */
+.highlight .o { color: #FF4689 } /* Operator */
+.highlight .x { color: #F8F8F2 } /* Other */
+.highlight .p { color: #F8F8F2 } /* Punctuation */
+.highlight .ch { color: #959077 } /* Comment.Hashbang */
+.highlight .cm { color: #959077 } /* Comment.Multiline */
+.highlight .cp { color: #959077 } /* Comment.Preproc */
+.highlight .cpf { color: #959077 } /* Comment.PreprocFile */
+.highlight .c1 { color: #959077 } /* Comment.Single */
+.highlight .cs { color: #959077 } /* Comment.Special */
+.highlight .gd { color: #FF4689 } /* Generic.Deleted */
+.highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+.highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #F8F8F2 } /* Generic.Error */
+.highlight .gh { color: #F8F8F2 } /* Generic.Heading */
+.highlight .gi { color: #A6E22E } /* Generic.Inserted */
+.highlight .go { color: #66D9EF } /* Generic.Output */
+.highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #959077 } /* Generic.Subheading */
+.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
+.highlight .kc { color: #66D9EF } /* Keyword.Constant */
+.highlight .kd { color: #66D9EF } /* Keyword.Declaration */
+.highlight .kn { color: #FF4689 } /* Keyword.Namespace */
+.highlight .kp { color: #66D9EF } /* Keyword.Pseudo */
+.highlight .kr { color: #66D9EF } /* Keyword.Reserved */
+.highlight .kt { color: #66D9EF } /* Keyword.Type */
+.highlight .ld { color: #E6DB74 } /* Literal.Date */
+.highlight .m { color: #AE81FF } /* Literal.Number */
+.highlight .s { color: #E6DB74 } /* Literal.String */
+.highlight .na { color: #A6E22E } /* Name.Attribute */
+.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
+.highlight .nc { color: #A6E22E } /* Name.Class */
+.highlight .no { color: #66D9EF } /* Name.Constant */
+.highlight .nd { color: #A6E22E } /* Name.Decorator */
+.highlight .ni { color: #F8F8F2 } /* Name.Entity */
+.highlight .ne { color: #A6E22E } /* Name.Exception */
+.highlight .nf { color: #A6E22E } /* Name.Function */
+.highlight .nl { color: #F8F8F2 } /* Name.Label */
+.highlight .nn { color: #F8F8F2 } /* Name.Namespace */
+.highlight .nx { color: #A6E22E } /* Name.Other */
+.highlight .py { color: #F8F8F2 } /* Name.Property */
+.highlight .nt { color: #FF4689 } /* Name.Tag */
+.highlight .nv { color: #F8F8F2 } /* Name.Variable */
+.highlight .ow { color: #FF4689 } /* Operator.Word */
+.highlight .pm { color: #F8F8F2 } /* Punctuation.Marker */
+.highlight .w { color: #F8F8F2 } /* Text.Whitespace */
+.highlight .mb { color: #AE81FF } /* Literal.Number.Bin */
+.highlight .mf { color: #AE81FF } /* Literal.Number.Float */
+.highlight .mh { color: #AE81FF } /* Literal.Number.Hex */
+.highlight .mi { color: #AE81FF } /* Literal.Number.Integer */
+.highlight .mo { color: #AE81FF } /* Literal.Number.Oct */
+.highlight .sa { color: #E6DB74 } /* Literal.String.Affix */
+.highlight .sb { color: #E6DB74 } /* Literal.String.Backtick */
+.highlight .sc { color: #E6DB74 } /* Literal.String.Char */
+.highlight .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+.highlight .sd { color: #E6DB74 } /* Literal.String.Doc */
+.highlight .s2 { color: #E6DB74 } /* Literal.String.Double */
+.highlight .se { color: #AE81FF } /* Literal.String.Escape */
+.highlight .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+.highlight .si { color: #E6DB74 } /* Literal.String.Interpol */
+.highlight .sx { color: #E6DB74 } /* Literal.String.Other */
+.highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
+.highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
+.highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
+.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #A6E22E } /* Name.Function.Magic */
+.highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
+.highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
+.highlight .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+.highlight .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+.highlight .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+</style>
+</head>
+<body>
+<nav>
+    <a href="/">Mboya Jeffers</a>
+    <ul class="nav-links" style="list-style:none; display:flex; margin:0; padding:0;">
+        <li><a href="/reliability-patterns/">Reliability Patterns</a></li>
+        <li><a href="/market-pulse/">Market Pulse</a></li>
+        <li><a href="https://github.com/mboyajeffers/pipeline-reliability-patterns" target="_blank" rel="noopener">Source</a></li>
+    </ul>
+</nav>
+<main>
+
+<p><a href="/reliability-patterns/">&larr; All pipelines</a></p>
+<h1>Finance Pipeline</h1>
+<div class="badge-row">
+    <img src="https://github.com/mboyajeffers/pipeline-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
+    <span class="pill">commit c09999a</span>
+    <a href="https://github.com/mboyajeffers/pipeline-reliability-patterns/tree/main/pipelines/finance" target="_blank" rel="noopener">View source on GitHub →</a>
+</div>
+<div class="card"><h1 id="finance-pipeline">Finance Pipeline</h1>
+<p><strong>What it does:</strong> ingests daily closing prices for a small set of equities (live source: Yahoo Finance's public chart endpoint, no API key — same source used elsewhere in this account's <code>financial-data-engineering</code> and the live <code>market-pulse</code> dashboard) and computes a portfolio total.</p>
+<p><strong>Architecture, in 5 lines:</strong> <code>fetch_live_bar()</code> hits the network → returns a plain <code>PriceRecord</code> → <code>PriceLedger.ingest()</code> stores it idempotently, keyed on <code>(symbol, date)</code> → <code>normalize_price()</code> converts every record to a common unit (USD) → <code>portfolio_value()</code> sums the normalized records. I/O and logic are deliberately separate (see <code>pipeline.py</code>'s module docstring) so the logic is unit-testable without a network call.</p>
+<p><strong>What this proves — see <code>BUILD_LOG.md</code> for the full postmortem on each:</strong>
+1. <strong>Idempotent ingestion under retry</strong> — a retried fetch for a price already on the ledger is a no-op, not a duplicate row.
+2. <strong>Currency/unit normalization correctness</strong> — a GBX-quoted (LSE pence) line item and a USD line item are never summed without conversion; an unrecognized currency fails loudly instead of guessing.</p>
+<p><strong>Run it yourself:</strong></p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>../../requirements.txt
+pytest<span class="w"> </span>tests/<span class="w"> </span>-v<span class="w">          </span><span class="c1"># deterministic, no network required</span>
+python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span class="w"> </span><span class="c1"># hits the real Yahoo Finance endpoint</span>
+</code></pre></div>
+
+<p><strong>What this is / isn't:</strong> a small demonstration pipeline built to make two specific, realistic production failure modes concrete and testable — not a trading system, not investment advice, not a claim that this is any specific employer's actual architecture. The FX rate used is static/illustrative, not a live feed (flagged in code).</p></div>
+
+<h2>Build Log — the postmortem</h2>
+<h1 id="build-log-finance-pipeline">Build Log — Finance Pipeline</h1>
+<p>Postmortem-style log, not a changelog: each entry is Issue / Impact / Root Cause / Fix / Prevention, the same shape a real incident review uses. See <code>../../EVALUATION_RUBRIC.md</code> for what this log is demonstrating structurally (rubric #9 — incident-response discipline).</p>
+<hr />
+<h2 id="issue-1-duplicate-price-records-on-ingestion-retry">Issue #1 — Duplicate price records on ingestion retry</h2>
+<p><strong>Found:</strong> during a simulated network-retry test against <code>PriceLedgerNaive</code> (<code>before/ingest_naive.py</code>).</p>
+<p><strong>Impact:</strong> any transient failure between "fetch succeeded" and "caller acknowledged the write" causes a retry to re-deliver the same day's price record. The naive ledger appends unconditionally, so the same <code>(symbol, date)</code> pair produces two rows. Any downstream aggregate keyed off row count (trade count, naive volume sum) silently doubles for that day.</p>
+<p><strong>Root cause:</strong> no identity key on ingestion. The ledger trusted "I received a record" as equivalent to "this is a new record," which is only true if the network never retries — it does.</p>
+<p><strong>Fix:</strong> <code>PriceLedger.ingest()</code> (<code>pipeline.py</code>) keys on <code>(symbol, date)</code> — the natural identity of "one closing price per symbol per day" — and treats a re-delivery of an existing key as a no-op, returning <code>False</code> instead of silently accepting it as new.</p>
+<p><strong>Prevention:</strong> <code>tests/test_idempotent_ingestion.py</code> pins this behavior with two tests: one (<code>xfail</code>, <code>strict=True</code>) that fails against the naive implementation for the documented reason, and one that asserts the fixed implementation reports <code>[True, False]</code> for a genuine-then-repeated record. If someone "simplifies" the ledger back to a plain list, CI turns red for the right reason.</p>
+<hr />
+<h2 id="issue-2-silent-currencyunit-corruption-in-portfolio-aggregation">Issue #2 — Silent currency/unit corruption in portfolio aggregation</h2>
+<p><strong>Found:</strong> while extending the pipeline to hold more than one symbol — noticed the portfolio total for a 2-line mixed-market portfolio (AAPL/USD + VOD.L/GBX) was off by roughly 20x from a manually-computed sanity check.</p>
+<p><strong>Impact:</strong> the London Stock Exchange quotes prices in GBX (pence), not GBP — a well-known gotcha, not a contrived one. A naive aggregator that sums raw quoted <code>close</code> values treats a GBX-quoted line item as if it were GBP (100x too high on that line) and any GBP line item as if it were USD (currency mismatch on top of that). The portfolio total is wrong, silently, with no error or warning — the kind of bug that only surfaces when someone manually checks the number against a brokerage statement.</p>
+<p><strong>Root cause:</strong> the pipeline combined values before normalizing them to a common unit. Aggregation and unit conversion were never actually the same step, they just looked like it because both operations were one line of code.</p>
+<p><strong>Fix:</strong> <code>normalize_price()</code> converts every record to USD before it's allowed anywhere near a sum, using an explicit <code>CURRENCY_TO_USD</code> table that includes the GBX minor-unit scale factor. <code>normalize_price()</code> raises on an unrecognized currency rather than defaulting to a guessed rate — a loud failure here is strictly better than a quiet wrong number in a portfolio report.</p>
+<p><strong>Prevention:</strong> <code>tests/test_currency_normalization.py</code> — an <code>xfail</code> test proving the naive aggregation is wrong by more than 5% (it's actually wrong by ~95%), plus direct tests on <code>normalize_price()</code> for the GBX conversion math and for the loud-failure-on-unknown-currency behavior.</p>
+<hr />
+<h2 id="what-this-pipeline-does-not-claim">What this pipeline does <em>not</em> claim</h2>
+<p>This is a demonstration pipeline built to make these two failure modes concrete and testable, not a production trading or portfolio-accounting system. The FX rate table is static/illustrative — a real build would source it from a live FX feed and version it, the same way <code>pipeline.py</code>'s docstring already flags.</p>
+<h2 id="version-history">Version History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0.0</td>
+<td>2026-08-17</td>
+<td>Initial build — 2 issues logged, fixed, and test-pinned</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Before → After</h2>
+<p class="subtitle">The pre-fix code is kept in the repo (not deleted) so this is checkable, not just asserted.</p>
+<h3>Before — <code>pipelines/finance/before/aggregate_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BEFORE — issue #2: no currency/unit normalization before aggregation.</span>
+
+<span class="sd">Kept intact (not deleted after the fix) so BUILD_LOG.md&#39;s claim is checkable.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pipelines.finance.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">PriceRecord</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">portfolio_value_naive</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PriceRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sums raw quoted `close` values with no currency or minor-unit conversion.</span>
+<span class="sd">    A GBX-quoted (pence) LSE line item is summed as if it were GBP — off by 100x</span>
+<span class="sd">    on that line — and a GBP line item is summed as if it were USD, silently</span>
+<span class="sd">    misstating the whole portfolio total.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">close</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span><span class="p">)</span>
+</pre></div>
+<h3>Before — <code>pipelines/finance/before/ingest_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BEFORE — issue #1: non-idempotent ingestion.</span>
+
+<span class="sd">Kept intact (not deleted after the fix) so BUILD_LOG.md&#39;s claim is checkable: run</span>
+<span class="sd">tests/test_idempotent_ingestion.py against this file and watch it fail for the</span>
+<span class="sd">documented reason, not a different one.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pipelines.finance.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">PriceRecord</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PriceLedgerNaive</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Appends every ingested record with no de-duplication. A retried fetch for a</span>
+<span class="sd">    (symbol, date) pair already on the ledger produces a second row — silently</span>
+<span class="sd">    double-counting that day in any downstream sum (e.g. daily volume, trade count).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PriceRecord</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">PriceRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># always reports &quot;new&quot; — this is the bug</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_records</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PriceRecord</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">)</span>
+</pre></div>
+
+<h3>After — <code>pipelines/finance/pipeline.py</code> (the fix, current on <code>main</code>)</h3>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Finance pipeline — daily price ingestion + portfolio valuation.</span>
+
+<span class="sd">Design note (testing discipline, see EVALUATION_RUBRIC.md #3): I/O (fetch_live_bar) is</span>
+<span class="sd">kept separate from pure logic (PriceLedger, normalize_price, portfolio_value) so the</span>
+<span class="sd">logic that actually matters for correctness can be unit-tested deterministically,</span>
+<span class="sd">without hitting a live network endpoint in CI. Run `python pipeline.py --live` to</span>
+<span class="sd">exercise the real Yahoo Finance fetch path locally.</span>
+
+<span class="sd">Two production issues are fixed here; see BUILD_LOG.md for the full postmortem on each:</span>
+<span class="sd">  1. Idempotent ingestion under retry (PriceLedger.ingest)</span>
+<span class="sd">  2. Currency/unit normalization correctness (normalize_price, portfolio_value)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">YAHOO_CHART_URL</span> <span class="o">=</span> <span class="s2">&quot;https://query1.finance.yahoo.com/v8/finance/chart/</span><span class="si">{symbol}</span><span class="s2">&quot;</span>
+
+<span class="c1"># Real, well-known gotcha: the London Stock Exchange quotes in GBX (pence), not GBP.</span>
+<span class="c1"># A US stock like AAPL quotes in USD. Summing raw quoted prices across a portfolio</span>
+<span class="c1"># that holds both without normalizing currency AND minor-unit scale silently produces</span>
+<span class="c1"># a portfolio value that&#39;s off by orders of magnitude for GBX-quoted names.</span>
+<span class="n">CURRENCY_TO_USD</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;USD&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;GBP&quot;</span><span class="p">:</span> <span class="mf">1.27</span><span class="p">,</span>   <span class="c1"># illustrative static rate — a live build would pull this from an FX feed</span>
+    <span class="s2">&quot;GBX&quot;</span><span class="p">:</span> <span class="mf">1.27</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span>  <span class="c1"># GBX is 1/100th of GBP</span>
+<span class="p">}</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PriceRecord</span><span class="p">:</span>
+    <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">date</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># YYYY-MM-DD</span>
+    <span class="n">close</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &quot;USD&quot;, &quot;GBP&quot;, &quot;GBX&quot;, ...</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PriceLedger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Idempotent, append-only store of ingested daily price records.</span>
+
+<span class="sd">    Fix for issue #1 (BUILD_LOG.md): ingest() is keyed on (symbol, date), the natural</span>
+<span class="sd">    identity of &quot;one closing price per symbol per day.&quot; A retried fetch for a record</span>
+<span class="sd">    already present is a no-op, not a duplicate row.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_records</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">PriceRecord</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">PriceRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if this was a new record, False if it was already ingested.&quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_records</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PriceRecord</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_price</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">PriceRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix for issue #2: convert a quoted price to a common unit (USD) before it is</span>
+<span class="sd">    ever combined with another instrument&#39;s price. Raises on an unrecognized currency</span>
+<span class="sd">    rather than silently treating it as USD — a wrong number should be loud, not quiet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">currency</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CURRENCY_TO_USD</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unrecognized currency </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">currency</span><span class="si">!r}</span><span class="s2"> for </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2"> — &quot;</span>
+            <span class="s2">&quot;refusing to guess an exchange rate.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">close</span> <span class="o">*</span> <span class="n">CURRENCY_TO_USD</span><span class="p">[</span><span class="n">record</span><span class="o">.</span><span class="n">currency</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">portfolio_value</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PriceRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum of normalized (USD) values — safe to call across a multi-currency portfolio.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">normalize_price</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_live_bar</span><span class="p">(</span><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">backoff_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PriceRecord</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Live path — hits the real Yahoo Finance chart endpoint (no API key required,</span>
+<span class="sd">    same source already used in this account&#39;s `financial-data-engineering` and the</span>
+<span class="sd">    live `market-pulse` dashboard). Retries on transient failure; the retry is exactly</span>
+<span class="sd">    what makes issue #1&#39;s idempotency fix necessary in the first place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">last_exc</span><span class="p">:</span> <span class="ne">Exception</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">retries</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">YAHOO_CHART_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="n">symbol</span><span class="p">),</span>
+                <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;range&quot;</span><span class="p">:</span> <span class="s2">&quot;5d&quot;</span><span class="p">,</span> <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="s2">&quot;1d&quot;</span><span class="p">},</span>
+                <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0&quot;</span><span class="p">},</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;chart&quot;</span><span class="p">][</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">]</span>
+            <span class="n">closes</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;indicators&quot;</span><span class="p">][</span><span class="s2">&quot;quote&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;close&quot;</span><span class="p">]</span>
+            <span class="n">timestamps</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span>
+            <span class="n">last_close</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">closes</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">last_ts</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">date_str</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">last_ts</span><span class="p">))</span>
+            <span class="n">currency</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;currency&quot;</span><span class="p">,</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">PriceRecord</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="n">symbol</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date_str</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="n">last_close</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="n">currency</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 — deliberately broad: this is the retry boundary</span>
+            <span class="n">last_exc</span> <span class="o">=</span> <span class="n">exc</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">backoff_seconds</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">attempt</span><span class="p">))</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to fetch </span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2"> after </span><span class="si">{</span><span class="n">retries</span><span class="si">}</span><span class="s2"> attempts&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">last_exc</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+    <span class="k">if</span> <span class="s2">&quot;--live&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+        <span class="n">ledger</span> <span class="o">=</span> <span class="n">PriceLedger</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;AAPL&quot;</span><span class="p">,</span> <span class="s2">&quot;VOD.L&quot;</span><span class="p">):</span>  <span class="c1"># VOD.L is GBX-quoted on the LSE</span>
+            <span class="n">rec</span> <span class="o">=</span> <span class="n">fetch_live_bar</span><span class="p">(</span><span class="n">sym</span><span class="p">)</span>
+            <span class="n">is_new</span> <span class="o">=</span> <span class="n">ledger</span><span class="o">.</span><span class="n">ingest</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sym</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">close</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">currency</span><span class="si">}</span><span class="s2"> (new=</span><span class="si">{</span><span class="n">is_new</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Portfolio value (USD): </span><span class="si">{</span><span class="n">portfolio_value</span><span class="p">(</span><span class="n">ledger</span><span class="o">.</span><span class="n">all_records</span><span class="p">())</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run with --live to hit the real Yahoo Finance endpoint. &quot;</span>
+              <span class="s2">&quot;See tests/ for deterministic unit tests of the ingestion/currency logic.&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<h2>Test output — proof, not a claim</h2>
+<p class="subtitle">Real <code>pytest -v</code> output from this exact commit, captured when this page was generated.
+<code>xfail</code> lines prove the bug is real against the pre-fix code; <code>PASSED</code> lines prove the fix.</p>
+<pre class="test-output">============================= test session starts ==============================
+collecting ... collected 7 items
+
+pipelines/finance/tests/test_currency_normalization.py::test_naive_aggregation_is_wrong_by_orders_of_magnitude XFAIL [ 14%]
+pipelines/finance/tests/test_currency_normalization.py::test_normalize_price_converts_gbx_correctly PASSED [ 28%]
+pipelines/finance/tests/test_currency_normalization.py::test_normalize_price_rejects_unknown_currency_loudly PASSED [ 42%]
+pipelines/finance/tests/test_currency_normalization.py::test_portfolio_value_is_currency_correct PASSED [ 57%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_naive_double_counts_on_retry XFAIL [ 71%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_is_idempotent_on_retry PASSED [ 85%]
+pipelines/finance/tests/test_idempotent_ingestion.py::test_fixed_ledger_accepts_genuinely_new_records PASSED [100%]
+
+========================= 5 passed, 2 xfailed in 0.07s =========================</pre>
+
+</main>
+<footer>
+    <div>© 2026 Mboya Jeffers</div>
+    <div style="margin-top:0.5rem;">
+        <a href="https://github.com/mboyajeffers" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/mboya-jeffers-6377ba325" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://x.com/Mboya_Jeffers" target="_blank" rel="noopener">X</a>
+        <a href="mailto:mboyajeffers9@gmail.com">Email</a>
+    </div>
+</footer>
+</body>
+</html>
