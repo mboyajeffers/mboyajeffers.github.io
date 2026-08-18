@@ -134,20 +134,30 @@ h1 {{ font-size: 2rem; margin-bottom: 0.25rem; }}
 h2 {{ font-size: 1.35rem; margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.75rem; }}
 h3 {{ font-size: 1.05rem; color: var(--accent-hover); }}
 a {{ color: var(--accent-hover); }}
-.subtitle {{ color: var(--text-dim); margin-bottom: 1.5rem; }}
-.badge-row {{ display: flex; gap: 0.75rem; align-items: center; margin: 1rem 0 2rem; flex-wrap: wrap; }}
+.subtitle {{
+    color: var(--text-dim); margin: 0 auto 1.75rem; max-width: 700px; text-align: center;
+}}
+.badge-row {{
+    display: flex; gap: 1.5rem; align-items: center; justify-content: center;
+    margin: 1.5rem 0 3rem; flex-wrap: wrap;
+}}
 .badge-row img {{ height: 20px; }}
 .pill {{
     display: inline-block; background: var(--accent-soft); color: var(--accent-hover);
-    border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+    border-radius: 999px; padding: 0.35rem 1rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
 }}
 .card {{
     background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
     padding: 1.5rem; margin: 1.25rem 0;
 }}
+.card.tile {{ padding: 2rem 1.75rem; text-align: center; }}
+.card.tile h3 {{ margin-bottom: 0.5rem; }}
 .card a.card-link {{ text-decoration: none; color: inherit; display: block; }}
 .card a.card-link:hover {{ border-color: var(--accent); }}
-.grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }}
+.grid {{
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
+    gap: 1.75rem; justify-content: center; margin: 0 auto;
+}}
 table {{ width: 100%; border-collapse: collapse; margin: 1rem 0; }}
 th, td {{ text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }}
 th {{ color: var(--text-dim); font-weight: 600; }}
@@ -204,7 +214,7 @@ def render_page(title: str, description: str, content: str, url: str, image: str
 def build_index(sha: str) -> None:
     cards = ""
     for p in PIPELINES:
-        cards += f"""<div class="card"><a class="card-link" href="/reliability-patterns/{p}/">
+        cards += f"""<div class="card tile"><a class="card-link" href="/reliability-patterns/{p}/">
             <h3>{p.capitalize()} Pipeline</h3>
             <p class="subtitle" style="margin-bottom:0;">2 realistic production issues found, fixed, and test-pinned. Full postmortem-style build log.</p>
         </a></div>"""
