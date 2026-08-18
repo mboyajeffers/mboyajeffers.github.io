@@ -138,7 +138,7 @@ a {{ color: var(--accent-hover); }}
     color: var(--text-dim); margin: 0 auto 2.25rem; max-width: 700px; text-align: center;
 }}
 .badge-row {{
-    display: flex; gap: 2.25rem; align-items: center; justify-content: center;
+    display: flex; column-gap: 3.5rem; row-gap: 1.25rem; align-items: center; justify-content: center;
     margin: 2rem 0 3.75rem; flex-wrap: wrap;
 }}
 .badge-row img {{ height: 20px; }}
@@ -156,7 +156,7 @@ a {{ color: var(--accent-hover); }}
 .card a.card-link:hover {{ border-color: var(--accent); }}
 .grid {{
     display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
-    gap: 2.5rem; justify-content: center; margin: 0 auto;
+    row-gap: 2rem; column-gap: 4rem; justify-content: center; margin: 0 auto;
 }}
 table {{ width: 100%; border-collapse: collapse; margin: 1rem 0; }}
 th, td {{ text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }}
