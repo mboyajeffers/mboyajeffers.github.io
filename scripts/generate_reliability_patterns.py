@@ -135,28 +135,28 @@ h2 {{ font-size: 1.35rem; margin-top: 2.5rem; border-top: 1px solid var(--border
 h3 {{ font-size: 1.05rem; color: var(--accent-hover); }}
 a {{ color: var(--accent-hover); }}
 .subtitle {{
-    color: var(--text-dim); margin: 0 auto 1.75rem; max-width: 700px; text-align: center;
+    color: var(--text-dim); margin: 0 auto 2.25rem; max-width: 700px; text-align: center;
 }}
 .badge-row {{
-    display: flex; gap: 1.5rem; align-items: center; justify-content: center;
-    margin: 1.5rem 0 3rem; flex-wrap: wrap;
+    display: flex; gap: 2.25rem; align-items: center; justify-content: center;
+    margin: 2rem 0 3.75rem; flex-wrap: wrap;
 }}
 .badge-row img {{ height: 20px; }}
 .pill {{
     display: inline-block; background: var(--accent-soft); color: var(--accent-hover);
-    border-radius: 999px; padding: 0.35rem 1rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+    border-radius: 999px; padding: 0.4rem 1.15rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
 }}
 .card {{
     background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
     padding: 1.5rem; margin: 1.25rem 0;
 }}
-.card.tile {{ padding: 2rem 1.75rem; text-align: center; }}
-.card.tile h3 {{ margin-bottom: 0.5rem; }}
+.card.tile {{ padding: 2.5rem 2rem; text-align: center; }}
+.card.tile h3 {{ margin-bottom: 0.75rem; }}
 .card a.card-link {{ text-decoration: none; color: inherit; display: block; }}
 .card a.card-link:hover {{ border-color: var(--accent); }}
 .grid {{
     display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
-    gap: 1.75rem; justify-content: center; margin: 0 auto;
+    gap: 2.5rem; justify-content: center; margin: 0 auto;
 }}
 table {{ width: 100%; border-collapse: collapse; margin: 1rem 0; }}
 th, td {{ text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }}
