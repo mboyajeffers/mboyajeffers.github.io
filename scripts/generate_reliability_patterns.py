@@ -83,6 +83,16 @@ BASE_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content="{description}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{url}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:image" content="{image}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@Mboya_Jeffers">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{description}">
+<meta name="twitter:image" content="{image}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -177,8 +187,14 @@ footer a {{ color: var(--text-dim); margin: 0 0.5rem; }}
 """
 
 
-def render_page(title: str, description: str, content: str) -> str:
-    return BASE_TEMPLATE.format(title=title, description=description, content=content, pygments_css=PYGMENTS_CSS)
+SITE_BASE = "https://mboyajeffers.github.io"
+
+
+def render_page(title: str, description: str, content: str, url: str, image: str) -> str:
+    return BASE_TEMPLATE.format(
+        title=title, description=description, content=content,
+        pygments_css=PYGMENTS_CSS, url=url, image=image,
+    )
 
 
 def build_index(sha: str) -> None:
@@ -212,6 +228,8 @@ from what's actually in the repo.</p>
         "Pipeline Reliability Patterns — Mboya Jeffers",
         "Four real pipelines, 8 realistic production failure modes found, fixed, and test-pinned.",
         content,
+        url=f"{SITE_BASE}/reliability-patterns/",
+        image=f"{SITE_BASE}/assets/og/reliability-patterns-index.png",
     ))
 
 
@@ -222,6 +240,8 @@ def build_rubric() -> None:
         "Evaluation Rubric — Pipeline Reliability Patterns",
         "The 9-point rubric this repo is built to satisfy, and where each point is demonstrated.",
         content,
+        url=f"{SITE_BASE}/reliability-patterns/rubric/",
+        image=f"{SITE_BASE}/assets/og/reliability-patterns-index.png",
     ))
 
 
@@ -266,6 +286,8 @@ def build_pipeline_page(pipeline: str, sha: str) -> None:
         f"{pipeline.capitalize()} Pipeline — Reliability Patterns",
         f"Real production failure modes found, fixed, and test-pinned in a {pipeline} data pipeline.",
         content,
+        url=f"{SITE_BASE}/reliability-patterns/{pipeline}/",
+        image=f"{SITE_BASE}/assets/og/reliability-patterns-{pipeline}.png",
     ))
 
 
