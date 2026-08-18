@@ -386,8 +386,9 @@
     .proof { background: var(--bg-secondary); }
 
     .proof-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 1.5rem;
     }
 
@@ -400,6 +401,8 @@
         color: inherit;
         transition: background 0.15s ease, border-color 0.15s ease;
         display: block;
+        flex: 1 1 360px;
+        max-width: 360px;
     }
 
     .proof-card:hover {
