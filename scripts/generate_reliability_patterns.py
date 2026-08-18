@@ -161,9 +161,14 @@ a {{ color: var(--accent-hover); }}
 table {{ width: 100%; border-collapse: collapse; margin: 1rem 0; }}
 th, td {{ text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }}
 th {{ color: var(--text-dim); font-weight: 600; }}
-code {{ font-family: 'Space Mono', monospace; background: var(--bg-secondary); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9em; }}
+code {{
+    font-family: 'Space Mono', monospace; background: var(--bg-secondary); padding: 0.1rem 0.35rem;
+    border-radius: 4px; font-size: 0.9em; overflow-wrap: anywhere;
+}}
 pre {{ overflow-x: auto; border-radius: 8px; padding: 1rem; border: 1px solid var(--border); }}
-pre code {{ background: none; padding: 0; }}
+pre code {{ background: none; padding: 0; overflow-wrap: normal; }}
+.table-wrap {{ overflow-x: auto; margin: 1rem 0; }}
+.table-wrap table {{ margin: 0; }}
 .test-output {{
     background: #0d0f12; border: 1px solid var(--border); border-radius: 8px;
     padding: 1rem; overflow-x: auto; font-family: 'Space Mono', monospace; font-size: 0.82rem;
@@ -249,6 +254,9 @@ from what's actually in the repo.</p>
 
 def build_rubric() -> None:
     rubric_html = md_to_html(BUILD_DIR / "EVALUATION_RUBRIC.md")
+    rubric_html = rubric_html.replace("<table>", '<div class="table-wrap"><table>').replace(
+        "</table>", "</table></div>"
+    )
     content = f"<div class='card'>{rubric_html}</div>"
     write(OUT_ROOT / "rubric" / "index.html", render_page(
         "Evaluation Rubric — Pipeline Reliability Patterns",
