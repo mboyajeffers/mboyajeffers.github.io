@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found — Mboya Jeffers</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-primary: #16181d;
+    --bg-card: #1f232a;
+    --accent: #6fae9c;
+    --accent-hover: #82c0ae;
+    --accent-soft: rgba(111, 174, 156, 0.14);
+    --text-primary: #eceef0;
+    --text-secondary: #a7adb5;
+    --text-muted: #6c7278;
+    --border-color: #2a2e35;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+.code {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+}
+h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 0.75rem; }
+p { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 2rem; max-width: 480px; }
+.links { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+.btn-primary {
+    background: var(--accent);
+    color: #0f1512;
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.15s ease;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.15s ease;
+}
+.btn-secondary:hover { border-color: var(--accent); background: var(--accent-soft); }
+</style>
+</head>
+<body>
+<div>
+    <div class="code">404</div>
+    <h1>That page doesn't exist.</h1>
+    <p>The link may be stale, or it never existed. Here's where you probably meant to go.</p>
+    <div class="links">
+        <a href="/" class="btn-primary">Home →</a>
+        <a href="/reliability-patterns/" class="btn-secondary">Reliability Patterns</a>
+        <a href="/market-pulse/" class="btn-secondary">Market Pulse</a>
+    </div>
+</div>
+</body>
+</html>
