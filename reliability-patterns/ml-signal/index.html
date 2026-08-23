@@ -125,14 +125,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .gd { color: #FF4689 } /* Generic.Deleted */
 .highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
 .highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
-.highlight .gr { color: #F8F8F2 } /* Generic.Error */
+.highlight .gr { color: #FF4689 } /* Generic.Error */
 .highlight .gh { color: #F8F8F2 } /* Generic.Heading */
 .highlight .gi { color: #A6E22E } /* Generic.Inserted */
 .highlight .go { color: #66D9EF } /* Generic.Output */
 .highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
 .highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
 .highlight .gu { color: #959077 } /* Generic.Subheading */
-.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
+.highlight .gt { color: #66D9EF } /* Generic.Traceback */
 .highlight .kc { color: #66D9EF } /* Keyword.Constant */
 .highlight .kd { color: #66D9EF } /* Keyword.Declaration */
 .highlight .kn { color: #FF4689 } /* Keyword.Namespace */
@@ -143,7 +143,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .m { color: #AE81FF } /* Literal.Number */
 .highlight .s { color: #E6DB74 } /* Literal.String */
 .highlight .na { color: #A6E22E } /* Name.Attribute */
-.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
+.highlight .nb { color: #A6E22E } /* Name.Builtin */
 .highlight .nc { color: #A6E22E } /* Name.Class */
 .highlight .no { color: #66D9EF } /* Name.Constant */
 .highlight .nd { color: #A6E22E } /* Name.Decorator */
@@ -177,7 +177,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
 .highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
 .highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
-.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.highlight .bp { color: #A6E22E } /* Name.Builtin.Pseudo */
 .highlight .fm { color: #A6E22E } /* Name.Function.Magic */
 .highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
 .highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
@@ -287,15 +287,15 @@ Registered SPY-v1 — active=False
 
 <h2>Before → After</h2>
 <p class="subtitle">The pre-fix code is kept in the repo (not deleted) so this is checkable, not just asserted.</p>
-<h3>Before — <code>model/before/naive_split.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<h3>Before — <code>model/before/naive_split.py</code></h3><div class="highlight"><pre><span></span><span class="sd">"""</span>
 <span class="sd">The naive, pre-fix version — kept in the repo, not deleted, so the leakage it</span>
 <span class="sd">causes can be proven directly rather than just described. See ../BUILD_LOG.md</span>
-<span class="sd">Issue #1 and ../pipeline.py&#39;s `walk_forward_splits()` for the fix.</span>
+<span class="sd">Issue #1 and ../pipeline.py's `walk_forward_splits()` for the fix.</span>
 
 <span class="sd">Looks like a reasonable walk-forward split at a glance: expanding train window,</span>
 <span class="sd">fixed test window, no shuffling, chronological order preserved. The bug is what</span>
-<span class="sd">it&#39;s missing, not what it does wrong.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">it's missing, not what it does wrong.</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -303,10 +303,10 @@ Registered SPY-v1 — active=False
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">naive_walk_forward_splits</span><span class="p">(</span><span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">min_train</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Same shape as pipeline.py&#39;s walk_forward_splits() — expanding train, fixed</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Same shape as pipeline.py's walk_forward_splits() — expanding train, fixed</span>
 <span class="sd">    test window — but with NO gap between train end and test start.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">usable</span> <span class="o">=</span> <span class="n">n_rows</span> <span class="o">-</span> <span class="n">min_train</span>
     <span class="n">test_size</span> <span class="o">=</span> <span class="n">usable</span> <span class="o">//</span> <span class="n">n_splits</span>
 
@@ -322,17 +322,17 @@ Registered SPY-v1 — active=False
 </pre></div>
 
 <h3>After — <code>model/pipeline.py</code> (the fix, current on <code>main</code>)</h3>
-<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><span class="sd">"""</span>
 <span class="sd">Signal model pipeline: fetch -&gt; features -&gt; walk-forward validate -&gt; gate -&gt; predict.</span>
 
 <span class="sd">I/O (fetch_daily_bars) and logic (everything else) are deliberately separate so the</span>
 <span class="sd">model logic is unit-testable without a network call — same separation used elsewhere</span>
-<span class="sd">in this account&#39;s public pipelines.</span>
+<span class="sd">in this account's public pipelines.</span>
 
 <span class="sd">Scope: a small, honest, real binary direction classifier (does the close price</span>
-<span class="sd">LOOKAHEAD_DAYS from now finish higher than today&#39;s close). Not a trading system,</span>
-<span class="sd">not investment advice — see README.md &quot;What this is / isn&#39;t&quot;.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">LOOKAHEAD_DAYS from now finish higher than today's close). Not a trading system,</span>
+<span class="sd">not investment advice — see README.md "What this is / isn't".</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -347,76 +347,76 @@ Registered SPY-v1 — active=False
 
 <span class="n">LOOKAHEAD_DAYS</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="n">GAP_DAYS</span> <span class="o">=</span> <span class="n">LOOKAHEAD_DAYS</span>  <span class="c1"># gap must be &gt;= lookahead or target leakage is possible — see BUILD_LOG Issue #1</span>
-<span class="n">REGISTRY_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;model_registry.json&quot;</span>
+<span class="n">REGISTRY_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"model_registry.json"</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">fetch_daily_bars</span><span class="p">(</span><span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;2y&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Live daily OHLCV via yfinance. No API key required.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_daily_bars</span><span class="p">(</span><span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"2y"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Live daily OHLCV via yfinance. No API key required."""</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">yfinance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">yf</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">Ticker</span><span class="p">(</span><span class="n">ticker</span><span class="p">)</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="s2">&quot;1d&quot;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">Ticker</span><span class="p">(</span><span class="n">ticker</span><span class="p">)</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="s2">"1d"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data returned for </span><span class="si">{</span><span class="n">ticker</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">str</span><span class="o">.</span><span class="n">lower</span><span class="p">)[[</span><span class="s2">&quot;open&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">]]</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No data returned for </span><span class="si">{</span><span class="n">ticker</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">str</span><span class="o">.</span><span class="n">lower</span><span class="p">)[[</span><span class="s2">"open"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"low"</span><span class="p">,</span> <span class="s2">"close"</span><span class="p">,</span> <span class="s2">"volume"</span><span class="p">]]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"date"</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_features</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Small, honest feature set (5 features) — deliberately not the exact feature</span>
 <span class="sd">    list/count of any private system. Real, standard technical features only.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">()</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">()</span>
 
-    <span class="c1"># RSI-14 (Wilder&#39;s smoothing)</span>
-    <span class="n">delta</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+    <span class="c1"># RSI-14 (Wilder's smoothing)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
     <span class="n">gain</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">delta</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">upper</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">rs</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">/</span> <span class="n">loss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;rsi_14&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="mi">100</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rs</span><span class="p">))</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"rsi_14"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="mi">100</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rs</span><span class="p">))</span>
 
-    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;sma20_ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volatility_10d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
-    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volume_ratio_20d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volume&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volume&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;momentum_5d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"sma20_ratio"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"volatility_10d"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"volume_ratio_20d"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"volume"</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">"volume"</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"momentum_5d"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out</span>
 
 
-<span class="n">FEATURE_COLS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;rsi_14&quot;</span><span class="p">,</span> <span class="s2">&quot;sma20_ratio&quot;</span><span class="p">,</span> <span class="s2">&quot;volatility_10d&quot;</span><span class="p">,</span> <span class="s2">&quot;volume_ratio_20d&quot;</span><span class="p">,</span> <span class="s2">&quot;momentum_5d&quot;</span><span class="p">]</span>
+<span class="n">FEATURE_COLS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"rsi_14"</span><span class="p">,</span> <span class="s2">"sma20_ratio"</span><span class="p">,</span> <span class="s2">"volatility_10d"</span><span class="p">,</span> <span class="s2">"volume_ratio_20d"</span><span class="p">,</span> <span class="s2">"momentum_5d"</span><span class="p">]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_target</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">lookahead</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">LOOKAHEAD_DAYS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Binary target: 1 if close price `lookahead` trading days ahead is higher than</span>
-<span class="sd">    today&#39;s close, else 0. NaN (dropped later) for the last `lookahead` rows —</span>
+<span class="sd">    today's close, else 0. NaN (dropped later) for the last `lookahead` rows —</span>
 <span class="sd">    there is no future data for them yet.</span>
 
 <span class="sd">    IMPORTANT: must only be called on chronologically sorted data. The target for</span>
 <span class="sd">    row T is computed from row T + lookahead — this is exactly the information</span>
-<span class="sd">    that must never be visible to a model trained on data &quot;as of&quot; row T. See</span>
-<span class="sd">    BUILD_LOG Issue #1 for what happens when a train/test split doesn&#39;t respect this.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    that must never be visible to a model trained on data "as of" row T. See</span>
+<span class="sd">    BUILD_LOG Issue #1 for what happens when a train/test split doesn't respect this.</span>
+<span class="sd">    """</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">forward_close</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">lookahead</span><span class="p">)</span>
-    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">forward_close</span> <span class="o">&gt;</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">forward_close</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">forward_close</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">lookahead</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"target"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">forward_close</span> <span class="o">&gt;</span> <span class="n">out</span><span class="p">[</span><span class="s2">"close"</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">forward_close</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">"target"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="k">return</span> <span class="n">out</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">walk_forward_splits</span><span class="p">(</span><span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">GAP_DAYS</span><span class="p">,</span> <span class="n">min_train</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Real walk-forward validation: expanding train window, gap between train end</span>
 <span class="sd">    and test start, fixed-size test window. Yields (train_idx, test_idx) arrays.</span>
 
 <span class="sd">    The gap exists specifically so that no row in the training set has a target</span>
 <span class="sd">    value computed from data inside the test window — see BUILD_LOG Issue #1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">usable</span> <span class="o">=</span> <span class="n">n_rows</span> <span class="o">-</span> <span class="n">min_train</span> <span class="o">-</span> <span class="n">gap</span>
     <span class="k">if</span> <span class="n">usable</span> <span class="o">&lt;</span> <span class="n">n_splits</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not enough rows (</span><span class="si">{</span><span class="n">n_rows</span><span class="si">}</span><span class="s2">) for </span><span class="si">{</span><span class="n">n_splits</span><span class="si">}</span><span class="s2"> walk-forward folds&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Not enough rows (</span><span class="si">{</span><span class="n">n_rows</span><span class="si">}</span><span class="s2">) for </span><span class="si">{</span><span class="n">n_splits</span><span class="si">}</span><span class="s2"> walk-forward folds"</span><span class="p">)</span>
     <span class="n">test_size</span> <span class="o">=</span> <span class="n">usable</span> <span class="o">//</span> <span class="n">n_splits</span>
 
     <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_splits</span><span class="p">):</span>
@@ -432,7 +432,7 @@ Registered SPY-v1 — active=False
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SignalModel</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thin wrapper around GradientBoostingClassifier — feature importances exposed directly.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Thin wrapper around GradientBoostingClassifier — feature importances exposed directly."""</span>
 
     <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">GradientBoostingClassifier</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -444,7 +444,7 @@ Registered SPY-v1 — active=False
             <span class="n">n_estimators</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SignalModel&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SignalModel"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_cols</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span>
@@ -457,7 +457,7 @@ Registered SPY-v1 — active=False
 
     <span class="k">def</span><span class="w"> </span><span class="nf">feature_importances</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model not fitted&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Model not fitted"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_cols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">feature_importances_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span>
             <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="o">-</span><span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
@@ -467,73 +467,73 @@ Registered SPY-v1 — active=False
 <span class="k">def</span><span class="w"> </span><span class="nf">walk_forward_validate</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">GAP_DAYS</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Runs walk-forward validation, returns per-fold accuracy, the majority-class</span>
 <span class="sd">    baseline for each fold, and the mean lift over baseline.</span>
 
 <span class="sd">    Reporting raw accuracy alone is exactly the mistake this function refuses to</span>
-<span class="sd">    make — see BUILD_LOG Issue #2. A model that only matches its fold&#39;s own</span>
+<span class="sd">    make — see BUILD_LOG Issue #2. A model that only matches its fold's own</span>
 <span class="sd">    majority-class rate has learned nothing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">clean</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">FEATURE_COLS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">clean</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">FEATURE_COLS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"target"</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">fold_results</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="ow">in</span> <span class="n">walk_forward_splits</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clean</span><span class="p">),</span> <span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="n">gap</span><span class="p">):</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">clean</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">clean</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idx</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">train</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">train</span><span class="p">[</span><span class="s2">"target"</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">model</span> <span class="o">=</span> <span class="n">SignalModel</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">SignalModel</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train</span><span class="p">[</span><span class="s2">"target"</span><span class="p">])</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
-        <span class="n">accuracy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">preds</span> <span class="o">==</span> <span class="n">test</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-        <span class="n">baseline</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">test</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">preds</span> <span class="o">==</span> <span class="n">test</span><span class="p">[</span><span class="s2">"target"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s2">"target"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">test</span><span class="p">[</span><span class="s2">"target"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
 
         <span class="n">fold_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span>
-            <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="n">baseline</span><span class="p">,</span>
-            <span class="s2">&quot;lift&quot;</span><span class="p">:</span> <span class="n">accuracy</span> <span class="o">-</span> <span class="n">baseline</span><span class="p">,</span>
-            <span class="s2">&quot;n_test&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">),</span>
+            <span class="s2">"accuracy"</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span>
+            <span class="s2">"baseline"</span><span class="p">:</span> <span class="n">baseline</span><span class="p">,</span>
+            <span class="s2">"lift"</span><span class="p">:</span> <span class="n">accuracy</span> <span class="o">-</span> <span class="n">baseline</span><span class="p">,</span>
+            <span class="s2">"n_test"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">),</span>
         <span class="p">})</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fold_results</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No valid folds produced — insufficient data&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No valid folds produced — insufficient data"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="n">fold_results</span><span class="p">,</span>
-        <span class="s2">&quot;mean_accuracy&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
-        <span class="s2">&quot;mean_baseline&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;baseline&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
-        <span class="s2">&quot;mean_lift&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;lift&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
+        <span class="s2">"folds"</span><span class="p">:</span> <span class="n">fold_results</span><span class="p">,</span>
+        <span class="s2">"mean_accuracy"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">"accuracy"</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
+        <span class="s2">"mean_baseline"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">"baseline"</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
+        <span class="s2">"mean_lift"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">"lift"</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
     <span class="p">}</span>
 
 
-<span class="c1"># --- Model registry: minimal, file-backed, hard gate before &quot;active&quot; ---</span>
+<span class="c1"># --- Model registry: minimal, file-backed, hard gate before "active" ---</span>
 
-<span class="n">MIN_LIFT_OVER_BASELINE</span> <span class="o">=</span> <span class="mf">0.03</span>  <span class="c1"># model must beat its own fold&#39;s majority-class rate by 3pp, not just beat 50%</span>
+<span class="n">MIN_LIFT_OVER_BASELINE</span> <span class="o">=</span> <span class="mf">0.03</span>  <span class="c1"># model must beat its own fold's majority-class rate by 3pp, not just beat 50%</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ModelRegistry</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">REGISTRY_PATH</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;models&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span><span class="s2">"models"</span><span class="p">:</span> <span class="p">[]}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">validation</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">gate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_LIFT_OVER_BASELINE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Registers a model. `active` is only ever True if it clears the lift gate.&quot;&quot;&quot;</span>
-        <span class="n">active</span> <span class="o">=</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_lift&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">gate</span>
+<span class="w">        </span><span class="sd">"""Registers a model. `active` is only ever True if it clears the lift gate."""</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">validation</span><span class="p">[</span><span class="s2">"mean_lift"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">gate</span>
         <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
-            <span class="s2">&quot;mean_accuracy&quot;</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_accuracy&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;mean_baseline&quot;</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_baseline&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;mean_lift&quot;</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_lift&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;gate&quot;</span><span class="p">:</span> <span class="n">gate</span><span class="p">,</span>
-            <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="n">active</span><span class="p">,</span>
+            <span class="s2">"version"</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+            <span class="s2">"mean_accuracy"</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">"mean_accuracy"</span><span class="p">],</span>
+            <span class="s2">"mean_baseline"</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">"mean_baseline"</span><span class="p">],</span>
+            <span class="s2">"mean_lift"</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">"mean_lift"</span><span class="p">],</span>
+            <span class="s2">"gate"</span><span class="p">:</span> <span class="n">gate</span><span class="p">,</span>
+            <span class="s2">"active"</span><span class="p">:</span> <span class="n">active</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">"models"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">active</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">active_model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="n">active</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">]]</span>
-        <span class="k">return</span> <span class="n">active</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">active</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">"models"</span><span class="p">]</span> <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s2">"active"</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">active</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">"version"</span><span class="p">]</span> <span class="k">if</span> <span class="n">active</span> <span class="k">else</span> <span class="kc">None</span>
 
 
 <span class="c1"># --- QA gate: rolling-accuracy circuit breaker ---</span>
@@ -543,12 +543,12 @@ Registered SPY-v1 — active=False
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">check_qa_hold</span><span class="p">(</span><span class="n">recent_outcomes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">ROLLING_WINDOW</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ROLLING_HOLD_THRESHOLD</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns True if predictions should be HELD (paused) — rolling accuracy over</span>
 <span class="sd">    the most recent `window` resolved predictions has dropped below `threshold`.</span>
-<span class="sd">    Returns False (safe to predict) if there isn&#39;t yet a full window of data —</span>
+<span class="sd">    Returns False (safe to predict) if there isn't yet a full window of data —</span>
 <span class="sd">    never holds on insufficient data, only on demonstrated underperformance.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">recent_outcomes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="n">recent</span> <span class="o">=</span> <span class="n">recent_outcomes</span><span class="p">[</span><span class="o">-</span><span class="n">window</span><span class="p">:]</span>
@@ -556,12 +556,12 @@ Registered SPY-v1 — active=False
     <span class="k">return</span> <span class="n">rolling_accuracy</span> <span class="o">&lt;</span> <span class="n">threshold</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--live&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fetch real data and run validation&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--ticker&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;SPY&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--live"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Fetch real data and run validation"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--ticker"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"SPY"</span><span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">live</span><span class="p">:</span>
@@ -570,8 +570,8 @@ Registered SPY-v1 — active=False
         <span class="n">result</span> <span class="o">=</span> <span class="n">walk_forward_validate</span><span class="p">(</span><span class="n">featured</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="p">()</span>
-        <span class="n">active</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-v1&quot;</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Registered </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-v1 — active=</span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-v1"</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Registered </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-v1 — active=</span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 
 
@@ -592,7 +592,7 @@ model/tests/test_walkforward_no_leakage.py::test_naive_split_has_no_target_leaka
 model/tests/test_walkforward_no_leakage.py::test_gap_split_has_no_target_leakage PASSED [ 90%]
 model/tests/test_walkforward_no_leakage.py::test_gap_split_folds_are_chronological_and_non_overlapping PASSED [100%]
 
-========================= 8 passed, 2 xfailed in 1.23s =========================</pre>
+========================= 8 passed, 2 xfailed in 2.09s =========================</pre>
 
 </main>
 <footer>
