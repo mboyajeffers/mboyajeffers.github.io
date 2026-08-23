@@ -201,7 +201,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1>Finance Pipeline</h1>
 <div class="badge-row">
     <img src="https://github.com/mboyajeffers/pipeline-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
-    <span class="pill">commit 6079af2</span>
+    <span class="pill">commit c4b6d47</span>
     <a href="https://github.com/mboyajeffers/pipeline-reliability-patterns/tree/main/pipelines/finance" target="_blank" rel="noopener">View source on GitHub →</a>
 </div>
 <div class="card"><h1 id="finance-pipeline">Finance Pipeline</h1>
@@ -231,7 +231,7 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <p><strong>Addendum, found during a scrutiny pass on this pipeline itself:</strong> the first version of the fix treated <em>any</em> second write under an existing <code>(symbol, date)</code> key as "already ingested, ignore it" — which is correct for a true retry (same value redelivered) but silently drops a genuine correction too (a different value arriving under the same key). That's the exact class of bug this pipeline exists to close, just relocated. Fixed: <code>ingest()</code> now compares the incoming value against what's already on the ledger — an exact match is a no-op (the retry case), a mismatch raises <code>ValueError</code> instead of guessing which value is right. A rejected conflict never applies, so the ledger's prior value stays intact.</p>
 <hr />
 <h2 id="issue-2-silent-currencyunit-corruption-in-portfolio-aggregation">Issue #2 — Silent currency/unit corruption in portfolio aggregation</h2>
-<p><strong>Found:</strong> while extending the pipeline to hold more than one symbol — noticed the portfolio total for a 2-line mixed-market portfolio (AAPL/USD + VOD.L/GBX) was off by roughly 20x from a manually-computed sanity check.</p>
+<p><strong>Found:</strong> while extending the pipeline to hold more than one symbol — noticed the portfolio total for a 2-line mixed-market portfolio (AAPL/USD + VOD.L/GBX) was off by roughly 22x from a manually-computed sanity check (7027.50 naive vs. 313.86 correct — the GBX-to-GBP minor-unit conversion itself is exactly 100x by definition; the ~22x figure is this specific portfolio's blended, data-dependent total).</p>
 <p><strong>Impact:</strong> the London Stock Exchange quotes prices in GBX (pence), not GBP — a well-known gotcha, not a contrived one. A naive aggregator that sums raw quoted <code>close</code> values treats a GBX-quoted line item as if it were GBP (100x too high on that line) and any GBP line item as if it were USD (currency mismatch on top of that). The portfolio total is wrong, silently, with no error or warning — the kind of bug that only surfaces when someone manually checks the number against a brokerage statement.</p>
 <p><strong>Root cause:</strong> the pipeline combined values before normalizing them to a common unit. Aggregation and unit conversion were never actually the same step, they just looked like it because both operations were one line of code.</p>
 <p><strong>Fix:</strong> <code>normalize_price()</code> converts every record to USD before it's allowed anywhere near a sum, using an explicit <code>CURRENCY_TO_USD</code> table that includes the GBX minor-unit scale factor. <code>normalize_price()</code> raises on an unrecognized currency rather than defaulting to a guessed rate — a loud failure here is strictly better than a quiet wrong number in a portfolio report.</p>
