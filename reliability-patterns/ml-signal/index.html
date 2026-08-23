@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Signal Model — Reliability Patterns</title>
+<meta name="description" content="A walk-forward validated, governed equity-direction model. Live status computed fresh from the real daily track record.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mboyajeffers.github.io/reliability-patterns/ml-signal/">
+<meta property="og:title" content="ML Signal Model — Reliability Patterns">
+<meta property="og:description" content="A walk-forward validated, governed equity-direction model. Live status computed fresh from the real daily track record.">
+<meta property="og:image" content="https://mboyajeffers.github.io/assets/og/reliability-patterns-index.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@Mboya_Jeffers">
+<meta name="twitter:title" content="ML Signal Model — Reliability Patterns">
+<meta name="twitter:description" content="A walk-forward validated, governed equity-direction model. Live status computed fresh from the real daily track record.">
+<meta name="twitter:image" content="https://mboyajeffers.github.io/assets/og/reliability-patterns-index.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-primary: #16181d;
+    --bg-secondary: #1b1e24;
+    --bg-card: #1f232a;
+    --accent: #6fae9c;
+    --accent-hover: #82c0ae;
+    --accent-soft: rgba(111, 174, 156, 0.14);
+    --border: #2a2f38;
+    --text: #e6e8eb;
+    --text-dim: #9aa1ab;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: var(--bg-primary);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+}
+.mono { font-family: 'Space Mono', monospace; }
+nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 2rem; border-bottom: 1px solid var(--border);
+    max-width: 960px; margin: 0 auto;
+}
+nav a { color: var(--text); text-decoration: none; font-weight: 600; }
+nav .nav-links a { color: var(--text-dim); margin-left: 1.5rem; font-weight: 500; font-size: 0.9rem; }
+nav .nav-links a:hover { color: var(--accent-hover); }
+main { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+h2 { font-size: 1.35rem; margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.75rem; }
+h3 { font-size: 1.05rem; color: var(--accent-hover); }
+a { color: var(--accent-hover); }
+.subtitle {
+    color: var(--text-dim); margin: 0 auto 2.25rem; max-width: 700px; text-align: center;
+}
+.badge-row {
+    display: flex; column-gap: 3.5rem; row-gap: 1.25rem; align-items: center; justify-content: center;
+    margin: 2rem 0 3.75rem; flex-wrap: wrap;
+}
+.badge-row img { height: 20px; }
+.pill {
+    display: inline-block; background: var(--accent-soft); color: var(--accent-hover);
+    border-radius: 999px; padding: 0.4rem 1.15rem; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+}
+.card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.5rem; margin: 1.25rem 0;
+}
+.card.tile { padding: 2.5rem 2rem; text-align: center; }
+.card.tile h3 { margin-bottom: 0.75rem; }
+.card a.card-link { text-decoration: none; color: inherit; display: block; }
+.card a.card-link:hover { border-color: var(--accent); }
+.grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
+    row-gap: 2rem; column-gap: 4rem; justify-content: center; margin: 0 auto;
+}
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+th { color: var(--text-dim); font-weight: 600; }
+code {
+    font-family: 'Space Mono', monospace; background: var(--bg-secondary); padding: 0.1rem 0.35rem;
+    border-radius: 4px; font-size: 0.9em; overflow-wrap: anywhere;
+}
+pre { overflow-x: auto; border-radius: 8px; padding: 1rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; overflow-wrap: normal; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+.table-wrap table { margin: 0; }
+.test-output {
+    background: #0d0f12; border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-family: 'Space Mono', monospace; font-size: 0.82rem;
+    color: #c7d0da; white-space: pre-wrap;
+}
+.test-output .pass { color: #7ee0a8; }
+footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; }
+footer a { color: var(--text-dim); margin: 0 0.5rem; }
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #49483e }
+.highlight { background: #272822; color: #F8F8F2 }
+.highlight .c { color: #959077 } /* Comment */
+.highlight .err { color: #ED007E; background-color: #1E0010 } /* Error */
+.highlight .esc { color: #F8F8F2 } /* Escape */
+.highlight .g { color: #F8F8F2 } /* Generic */
+.highlight .k { color: #66D9EF } /* Keyword */
+.highlight .l { color: #AE81FF } /* Literal */
+.highlight .n { color: #F8F8F2 } /* Name */
+.highlight .o { color: #FF4689 } /* Operator */
+.highlight .x { color: #F8F8F2 } /* Other */
+.highlight .p { color: #F8F8F2 } /* Punctuation */
+.highlight .ch { color: #959077 } /* Comment.Hashbang */
+.highlight .cm { color: #959077 } /* Comment.Multiline */
+.highlight .cp { color: #959077 } /* Comment.Preproc */
+.highlight .cpf { color: #959077 } /* Comment.PreprocFile */
+.highlight .c1 { color: #959077 } /* Comment.Single */
+.highlight .cs { color: #959077 } /* Comment.Special */
+.highlight .gd { color: #FF4689 } /* Generic.Deleted */
+.highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+.highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #F8F8F2 } /* Generic.Error */
+.highlight .gh { color: #F8F8F2 } /* Generic.Heading */
+.highlight .gi { color: #A6E22E } /* Generic.Inserted */
+.highlight .go { color: #66D9EF } /* Generic.Output */
+.highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #959077 } /* Generic.Subheading */
+.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
+.highlight .kc { color: #66D9EF } /* Keyword.Constant */
+.highlight .kd { color: #66D9EF } /* Keyword.Declaration */
+.highlight .kn { color: #FF4689 } /* Keyword.Namespace */
+.highlight .kp { color: #66D9EF } /* Keyword.Pseudo */
+.highlight .kr { color: #66D9EF } /* Keyword.Reserved */
+.highlight .kt { color: #66D9EF } /* Keyword.Type */
+.highlight .ld { color: #E6DB74 } /* Literal.Date */
+.highlight .m { color: #AE81FF } /* Literal.Number */
+.highlight .s { color: #E6DB74 } /* Literal.String */
+.highlight .na { color: #A6E22E } /* Name.Attribute */
+.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
+.highlight .nc { color: #A6E22E } /* Name.Class */
+.highlight .no { color: #66D9EF } /* Name.Constant */
+.highlight .nd { color: #A6E22E } /* Name.Decorator */
+.highlight .ni { color: #F8F8F2 } /* Name.Entity */
+.highlight .ne { color: #A6E22E } /* Name.Exception */
+.highlight .nf { color: #A6E22E } /* Name.Function */
+.highlight .nl { color: #F8F8F2 } /* Name.Label */
+.highlight .nn { color: #F8F8F2 } /* Name.Namespace */
+.highlight .nx { color: #A6E22E } /* Name.Other */
+.highlight .py { color: #F8F8F2 } /* Name.Property */
+.highlight .nt { color: #FF4689 } /* Name.Tag */
+.highlight .nv { color: #F8F8F2 } /* Name.Variable */
+.highlight .ow { color: #FF4689 } /* Operator.Word */
+.highlight .pm { color: #F8F8F2 } /* Punctuation.Marker */
+.highlight .w { color: #F8F8F2 } /* Text.Whitespace */
+.highlight .mb { color: #AE81FF } /* Literal.Number.Bin */
+.highlight .mf { color: #AE81FF } /* Literal.Number.Float */
+.highlight .mh { color: #AE81FF } /* Literal.Number.Hex */
+.highlight .mi { color: #AE81FF } /* Literal.Number.Integer */
+.highlight .mo { color: #AE81FF } /* Literal.Number.Oct */
+.highlight .sa { color: #E6DB74 } /* Literal.String.Affix */
+.highlight .sb { color: #E6DB74 } /* Literal.String.Backtick */
+.highlight .sc { color: #E6DB74 } /* Literal.String.Char */
+.highlight .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+.highlight .sd { color: #E6DB74 } /* Literal.String.Doc */
+.highlight .s2 { color: #E6DB74 } /* Literal.String.Double */
+.highlight .se { color: #AE81FF } /* Literal.String.Escape */
+.highlight .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+.highlight .si { color: #E6DB74 } /* Literal.String.Interpol */
+.highlight .sx { color: #E6DB74 } /* Literal.String.Other */
+.highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
+.highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
+.highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
+.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #A6E22E } /* Name.Function.Magic */
+.highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
+.highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
+.highlight .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+.highlight .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+.highlight .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+</style>
+</head>
+<body>
+<nav>
+    <a href="/">Mboya Jeffers</a>
+    <ul class="nav-links" style="list-style:none; display:flex; margin:0; padding:0;">
+        <li><a href="/reliability-patterns/">Reliability Patterns</a></li>
+        <li><a href="/market-pulse/">Market Pulse</a></li>
+        <li><a href="https://github.com/mboyajeffers/pipeline-reliability-patterns" target="_blank" rel="noopener">Source</a></li>
+    </ul>
+</nav>
+<main>
+
+<p><a href="/reliability-patterns/">&larr; All pipelines</a></p>
+<h1>ML Signal Model</h1>
+<div class="badge-row">
+    <img src="https://github.com/mboyajeffers/ml-signal-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
+    <span class="pill">commit b3cedc8</span>
+    <a href="https://github.com/mboyajeffers/ml-signal-reliability-patterns" target="_blank" rel="noopener">View source on GitHub →</a>
+</div>
+<div class="card"><h1 id="signal-model">Signal Model</h1>
+<p><strong>What it does:</strong> predicts whether SPY's close price will be higher <code>LOOKAHEAD_DAYS</code> (3) trading days from now, using 5 standard technical features computed from live daily OHLCV (Yahoo Finance, no API key).</p>
+<p><strong>Architecture, in 5 lines:</strong> <code>fetch_daily_bars()</code> hits the network → <code>compute_features()</code> builds RSI-14/SMA-ratio/volatility/volume-ratio/momentum → <code>compute_target()</code> labels each row from its own future (with a documented lookahead-leakage hazard, see <code>BUILD_LOG.md</code> Issue #1) → <code>walk_forward_splits()</code> validates with an explicit gap → <code>ModelRegistry</code> gates promotion on lift over baseline, never raw accuracy (Issue #2). I/O and logic are separate so the logic is unit-testable without a network call.</p>
+<p><strong>What this proves — see <code>BUILD_LOG.md</code> for the full postmortem on each:</strong>
+1. <strong>No-lookahead walk-forward validation</strong> — a gap between train and test sized to the label's own lookahead window, proven structurally, not by trusting a clean-looking split.
+2. <strong>Governance that rejects real models, honestly</strong> — the first live run (SPY, 2yr, 2026-08-20) registered as <code>active=False</code>. That result is reported here in full, not replaced with a better-looking one.</p>
+<p><strong>Run it yourself:</strong></p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>../requirements.txt
+pytest<span class="w"> </span>../model/tests<span class="w"> </span>-v<span class="w">         </span><span class="c1"># deterministic, no network required</span>
+python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span class="w"> </span>--ticker<span class="w"> </span>SPY<span class="w">   </span><span class="c1"># hits the real Yahoo Finance endpoint</span>
+</code></pre></div>
+
+<p><strong>Extending this (explicitly out of scope for this pass):</strong>
+- The current single-ticker, 5-feature setup doesn't clear its own gate — a pooled multi-ticker cross-sectional training set (more rows, more regime diversity) or a broader feature set (fundamentals, macro) is the natural next iteration, not attempted here so this stays a small, honestly-scoped demonstration rather than a moving target.
+- Wiring <code>live/daily_predict.py</code>'s output into an actual paper-trading order (via a <code>BrokerInterface</code>-style abstraction) is a clean, separate addition — this repo deliberately stops at "signal," not "trade."</p>
+<p><strong>What this is / isn't:</strong> a small demonstration of ML validation and governance discipline — not a trading system, not investment advice, not a claim that this is any specific employer's or private system's actual architecture, and not (currently) a model that has earned production status by its own stated rule.</p></div>
+
+<h2>Live status — computed fresh, not asserted</h2>
+<p class="subtitle">Recomputed directly from <code>live/track_record.jsonl</code> every time this
+page is generated — the same file the daily cron appends to, read straight, not summarized from
+memory.</p>
+
+<div class="card">
+<p><b>2</b> real, dated live-tracking days so far —
+one entry appended by the daily cron every trading day, win or lose.</p>
+<table>
+<tr><th>Latest</th><td>2026-08-21</td></tr>
+<tr><th>Model version</th><td><code>SPY-2026-08-21</code></td></tr>
+<tr><th>Mean accuracy</th><td>0.511</td></tr>
+<tr><th>Mean baseline (this fold's own majority class)</th><td>0.626</td></tr>
+<tr><th>Mean lift</th><td>-0.115</td></tr>
+<tr><th>Gate</th><td>not yet cleared</td></tr>
+</table>
+<p class="subtitle" style="margin-bottom:0;">Backtested and live are different claims, labeled
+every time — see the repo's own README before citing any number from here. A gate not yet
+cleared is disclosed, not hidden; that disclosure is the actual point of this section.</p>
+</div>
+
+<h2>Build Log — the postmortem</h2>
+<h1 id="build-log-signal-model">Build Log — Signal Model</h1>
+<p>Postmortem-style log, not a changelog: each entry is Issue / Impact / Root Cause / Fix / Prevention, the same shape a real incident review uses. See <code>../EVALUATION_RUBRIC.md</code> for what this log is demonstrating structurally (rubric #9 — incident-response discipline).</p>
+<hr />
+<h2 id="issue-1-walk-forward-split-leaked-target-information-across-the-traintest-boundary">Issue #1 — Walk-forward split leaked target information across the train/test boundary</h2>
+<p><strong>Found:</strong> while writing the first version of the walk-forward validator, structurally checking each fold's boundary rather than just trusting the split looked chronological (<code>before/naive_split.py</code> — kept, not deleted).</p>
+<p><strong>Impact:</strong> the target for row T is computed from row T + <code>LOOKAHEAD_DAYS</code> (<code>compute_target()</code> in <code>pipeline.py</code>). A walk-forward split with no gap between train end and test start puts training rows whose target was computed from data <em>inside the test window</em> directly into the training set. The model doesn't need to "cheat" on the test set directly — it's trained on rows that already encode test-window information through their labels. This is the exact same class of bug documented in the private methodology this repo's technique is modeled on (a gap sized to the lookahead window, there called <code>TimeSeriesSplit(..., gap=7)</code>), rebuilt fresh here rather than copied.</p>
+<p><strong>Root cause:</strong> the naive split (<code>naive_walk_forward_splits</code>) is chronological and non-shuffled — the two properties that make a split <em>look</em> correct at a glance — but doesn't account for the lookahead window baked into every label near a fold boundary.</p>
+<p><strong>Fix:</strong> <code>walk_forward_splits()</code> in <code>pipeline.py</code> inserts an explicit <code>gap</code> (defaults to <code>LOOKAHEAD_DAYS</code>) between the end of train and the start of test, so no training row's label window can reach into the test set.</p>
+<p><strong>Prevention:</strong> <code>tests/test_walkforward_no_leakage.py</code> proves this structurally, not by observing an accuracy delta — it directly checks, for every fold, whether any training row's label window overlaps the test window. One test (<code>xfail</code>, <code>strict=True</code>) proves the naive split leaks on every fold; one proves the gapped split never does.</p>
+<hr />
+<h2 id="issue-2-raw-accuracy-is-not-a-valid-promotion-gate">Issue #2 — Raw accuracy is not a valid promotion gate</h2>
+<p><strong>Found:</strong> running real walk-forward validation against live SPY data (<code>python pipeline.py --live --ticker SPY</code>, 2026-08-20) to generate the first registry entry — not a synthetic example.</p>
+<p><strong>Real, unmodified output from that run:</strong></p>
+<div class="highlight"><pre><span></span><code>mean_accuracy: 0.489   mean_baseline: 0.629   mean_lift: -0.140
+Registered SPY-v1 — active=False
+</code></pre></div>
+
+<p><strong>Impact:</strong> this result is the whole point of this issue, not an inconvenience to hide. Individual fold baselines (majority-class rate) ranged from 0.51 to 0.74 — during a fold where the market trended strongly, "predict UP every day" alone scores 74%. A gate that only checked <code>accuracy &gt; 0.50</code> would have looked at this model's individual fold accuracies (0.43–0.55) and, depending on which fold, could still pass some of them — a model that is materially <em>worse</em> than doing nothing would clear a naive gate. <code>test_raw_accuracy_alone_is_not_a_valid_gate</code> proves this directly using this repo's own numbers: 0.58 raw accuracy against a 0.58 baseline is zero lift, not a working model, even though <code>0.58 &gt; 0.50</code>.</p>
+<p><strong>Root cause:</strong> accuracy is not translation-invariant to class balance. A single scalar number without its baseline is not evaluable.</p>
+<p><strong>Fix:</strong> <code>ModelRegistry.register()</code> gates on <code>mean_lift</code> (accuracy minus that fold's own majority-class baseline, averaged across folds) against <code>MIN_LIFT_OVER_BASELINE</code>, never on raw accuracy alone. The SPY-v1 run above is registered — every run is, win or lose, nothing is hidden — but <code>active=False</code>. No signal is ever issued from a model that isn't active (see <code>live/daily_predict.py</code>).</p>
+<p><strong>Prevention:</strong> <code>tests/test_qa_gate_circuit_breaker.py::test_registry_rejects_model_below_lift_gate</code> and <code>::test_registry_accepts_model_above_lift_gate</code> pin both directions of this behavior directly against <code>ModelRegistry</code>.</p>
+<hr />
+<h2 id="what-this-pipeline-does-not-claim">What this pipeline does <em>not</em> claim</h2>
+<p>The 5-feature technical-only set here does not currently clear its own gate on the single tickers tested (SPY, AAPL, MSFT, QQQ — all negative lift, logged honestly, not cherry-picked). That is a disclosed, real limitation, not a hidden one — and it is itself evidence the gate works: a system that always finds a way to pass its own gate isn't a gate. Building a model that reliably clears this bar (broader feature set, fundamentals, a larger pooled ticker universe) is future work, explicitly out of scope for this pass — see the top-level README's "What this is / isn't."</p>
+<h2 id="version-history">Version History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0.0</td>
+<td>2026-08-20</td>
+<td>Initial build — 2 issues logged, fixed, and test-pinned. First live validation run (SPY, 2y) registered honestly as inactive.</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Before → After</h2>
+<p class="subtitle">The pre-fix code is kept in the repo (not deleted) so this is checkable, not just asserted.</p>
+<h3>Before — <code>model/before/naive_split.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The naive, pre-fix version — kept in the repo, not deleted, so the leakage it</span>
+<span class="sd">causes can be proven directly rather than just described. See ../BUILD_LOG.md</span>
+<span class="sd">Issue #1 and ../pipeline.py&#39;s `walk_forward_splits()` for the fix.</span>
+
+<span class="sd">Looks like a reasonable walk-forward split at a glance: expanding train window,</span>
+<span class="sd">fixed test window, no shuffling, chronological order preserved. The bug is what</span>
+<span class="sd">it&#39;s missing, not what it does wrong.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">naive_walk_forward_splits</span><span class="p">(</span><span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">min_train</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Same shape as pipeline.py&#39;s walk_forward_splits() — expanding train, fixed</span>
+<span class="sd">    test window — but with NO gap between train end and test start.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">usable</span> <span class="o">=</span> <span class="n">n_rows</span> <span class="o">-</span> <span class="n">min_train</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="n">usable</span> <span class="o">//</span> <span class="n">n_splits</span>
+
+    <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_splits</span><span class="p">):</span>
+        <span class="n">train_end</span> <span class="o">=</span> <span class="n">min_train</span> <span class="o">+</span> <span class="n">fold</span> <span class="o">*</span> <span class="n">test_size</span>
+        <span class="n">test_start</span> <span class="o">=</span> <span class="n">train_end</span>  <span class="c1"># &lt;-- the bug: test starts immediately where train ends</span>
+        <span class="n">test_end</span> <span class="o">=</span> <span class="n">test_start</span> <span class="o">+</span> <span class="n">test_size</span>
+        <span class="k">if</span> <span class="n">test_end</span> <span class="o">&gt;</span> <span class="n">n_rows</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">train_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">train_end</span><span class="p">)</span>
+        <span class="n">test_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">test_start</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">test_end</span><span class="p">,</span> <span class="n">n_rows</span><span class="p">))</span>
+        <span class="k">yield</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span>
+</pre></div>
+
+<h3>After — <code>model/pipeline.py</code> (the fix, current on <code>main</code>)</h3>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Signal model pipeline: fetch -&gt; features -&gt; walk-forward validate -&gt; gate -&gt; predict.</span>
+
+<span class="sd">I/O (fetch_daily_bars) and logic (everything else) are deliberately separate so the</span>
+<span class="sd">model logic is unit-testable without a network call — same separation used elsewhere</span>
+<span class="sd">in this account&#39;s public pipelines.</span>
+
+<span class="sd">Scope: a small, honest, real binary direction classifier (does the close price</span>
+<span class="sd">LOOKAHEAD_DAYS from now finish higher than today&#39;s close). Not a trading system,</span>
+<span class="sd">not investment advice — see README.md &quot;What this is / isn&#39;t&quot;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientBoostingClassifier</span>
+
+<span class="n">LOOKAHEAD_DAYS</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">GAP_DAYS</span> <span class="o">=</span> <span class="n">LOOKAHEAD_DAYS</span>  <span class="c1"># gap must be &gt;= lookahead or target leakage is possible — see BUILD_LOG Issue #1</span>
+<span class="n">REGISTRY_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;model_registry.json&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_daily_bars</span><span class="p">(</span><span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;2y&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Live daily OHLCV via yfinance. No API key required.&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yfinance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">yf</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">Ticker</span><span class="p">(</span><span class="n">ticker</span><span class="p">)</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="s2">&quot;1d&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data returned for </span><span class="si">{</span><span class="n">ticker</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">str</span><span class="o">.</span><span class="n">lower</span><span class="p">)[[</span><span class="s2">&quot;open&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">]]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_features</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Small, honest feature set (5 features) — deliberately not the exact feature</span>
+<span class="sd">    list/count of any private system. Real, standard technical features only.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">()</span>
+
+    <span class="c1"># RSI-14 (Wilder&#39;s smoothing)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+    <span class="n">gain</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">delta</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">upper</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">/</span> <span class="n">loss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;rsi_14&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="mi">100</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rs</span><span class="p">))</span>
+
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;sma20_ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volatility_10d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volume_ratio_20d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volume&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;volume&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;momentum_5d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="n">FEATURE_COLS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;rsi_14&quot;</span><span class="p">,</span> <span class="s2">&quot;sma20_ratio&quot;</span><span class="p">,</span> <span class="s2">&quot;volatility_10d&quot;</span><span class="p">,</span> <span class="s2">&quot;volume_ratio_20d&quot;</span><span class="p">,</span> <span class="s2">&quot;momentum_5d&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_target</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">lookahead</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">LOOKAHEAD_DAYS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Binary target: 1 if close price `lookahead` trading days ahead is higher than</span>
+<span class="sd">    today&#39;s close, else 0. NaN (dropped later) for the last `lookahead` rows —</span>
+<span class="sd">    there is no future data for them yet.</span>
+
+<span class="sd">    IMPORTANT: must only be called on chronologically sorted data. The target for</span>
+<span class="sd">    row T is computed from row T + lookahead — this is exactly the information</span>
+<span class="sd">    that must never be visible to a model trained on data &quot;as of&quot; row T. See</span>
+<span class="sd">    BUILD_LOG Issue #1 for what happens when a train/test split doesn&#39;t respect this.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">forward_close</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">lookahead</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">forward_close</span> <span class="o">&gt;</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">forward_close</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">walk_forward_splits</span><span class="p">(</span><span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">GAP_DAYS</span><span class="p">,</span> <span class="n">min_train</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Real walk-forward validation: expanding train window, gap between train end</span>
+<span class="sd">    and test start, fixed-size test window. Yields (train_idx, test_idx) arrays.</span>
+
+<span class="sd">    The gap exists specifically so that no row in the training set has a target</span>
+<span class="sd">    value computed from data inside the test window — see BUILD_LOG Issue #1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">usable</span> <span class="o">=</span> <span class="n">n_rows</span> <span class="o">-</span> <span class="n">min_train</span> <span class="o">-</span> <span class="n">gap</span>
+    <span class="k">if</span> <span class="n">usable</span> <span class="o">&lt;</span> <span class="n">n_splits</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not enough rows (</span><span class="si">{</span><span class="n">n_rows</span><span class="si">}</span><span class="s2">) for </span><span class="si">{</span><span class="n">n_splits</span><span class="si">}</span><span class="s2"> walk-forward folds&quot;</span><span class="p">)</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="n">usable</span> <span class="o">//</span> <span class="n">n_splits</span>
+
+    <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_splits</span><span class="p">):</span>
+        <span class="n">train_end</span> <span class="o">=</span> <span class="n">min_train</span> <span class="o">+</span> <span class="n">fold</span> <span class="o">*</span> <span class="n">test_size</span>
+        <span class="n">test_start</span> <span class="o">=</span> <span class="n">train_end</span> <span class="o">+</span> <span class="n">gap</span>
+        <span class="n">test_end</span> <span class="o">=</span> <span class="n">test_start</span> <span class="o">+</span> <span class="n">test_size</span>
+        <span class="k">if</span> <span class="n">test_end</span> <span class="o">&gt;</span> <span class="n">n_rows</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">train_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">train_end</span><span class="p">)</span>
+        <span class="n">test_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">test_start</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">test_end</span><span class="p">,</span> <span class="n">n_rows</span><span class="p">))</span>
+        <span class="k">yield</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SignalModel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thin wrapper around GradientBoostingClassifier — feature importances exposed directly.&quot;&quot;&quot;</span>
+
+    <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">GradientBoostingClassifier</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">feature_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">FEATURE_COLS</span><span class="p">))</span>
+    <span class="n">is_fitted</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span>
+            <span class="n">n_estimators</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SignalModel&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_cols</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_cols</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_cols</span><span class="p">])[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">feature_importances</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model not fitted&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_cols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">feature_importances_</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="o">-</span><span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">walk_forward_validate</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">GAP_DAYS</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs walk-forward validation, returns per-fold accuracy, the majority-class</span>
+<span class="sd">    baseline for each fold, and the mean lift over baseline.</span>
+
+<span class="sd">    Reporting raw accuracy alone is exactly the mistake this function refuses to</span>
+<span class="sd">    make — see BUILD_LOG Issue #2. A model that only matches its fold&#39;s own</span>
+<span class="sd">    majority-class rate has learned nothing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">clean</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">FEATURE_COLS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fold_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="ow">in</span> <span class="n">walk_forward_splits</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clean</span><span class="p">),</span> <span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="n">gap</span><span class="p">):</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">clean</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">clean</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">train</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">SignalModel</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">preds</span> <span class="o">==</span> <span class="n">test</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">test</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+
+        <span class="n">fold_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span>
+            <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="n">baseline</span><span class="p">,</span>
+            <span class="s2">&quot;lift&quot;</span><span class="p">:</span> <span class="n">accuracy</span> <span class="o">-</span> <span class="n">baseline</span><span class="p">,</span>
+            <span class="s2">&quot;n_test&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">),</span>
+        <span class="p">})</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fold_results</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No valid folds produced — insufficient data&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="n">fold_results</span><span class="p">,</span>
+        <span class="s2">&quot;mean_accuracy&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
+        <span class="s2">&quot;mean_baseline&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;baseline&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
+        <span class="s2">&quot;mean_lift&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;lift&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fold_results</span><span class="p">])),</span>
+    <span class="p">}</span>
+
+
+<span class="c1"># --- Model registry: minimal, file-backed, hard gate before &quot;active&quot; ---</span>
+
+<span class="n">MIN_LIFT_OVER_BASELINE</span> <span class="o">=</span> <span class="mf">0.03</span>  <span class="c1"># model must beat its own fold&#39;s majority-class rate by 3pp, not just beat 50%</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelRegistry</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">REGISTRY_PATH</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;models&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">validation</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">gate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_LIFT_OVER_BASELINE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Registers a model. `active` is only ever True if it clears the lift gate.&quot;&quot;&quot;</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_lift&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">gate</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+            <span class="s2">&quot;mean_accuracy&quot;</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_accuracy&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;mean_baseline&quot;</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_baseline&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;mean_lift&quot;</span><span class="p">:</span> <span class="n">validation</span><span class="p">[</span><span class="s2">&quot;mean_lift&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;gate&quot;</span><span class="p">:</span> <span class="n">gate</span><span class="p">,</span>
+            <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="n">active</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">active</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">active_model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">active</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">active</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="c1"># --- QA gate: rolling-accuracy circuit breaker ---</span>
+
+<span class="n">ROLLING_WINDOW</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">ROLLING_HOLD_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.45</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check_qa_hold</span><span class="p">(</span><span class="n">recent_outcomes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">ROLLING_WINDOW</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ROLLING_HOLD_THRESHOLD</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if predictions should be HELD (paused) — rolling accuracy over</span>
+<span class="sd">    the most recent `window` resolved predictions has dropped below `threshold`.</span>
+<span class="sd">    Returns False (safe to predict) if there isn&#39;t yet a full window of data —</span>
+<span class="sd">    never holds on insufficient data, only on demonstrated underperformance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">recent_outcomes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">recent</span> <span class="o">=</span> <span class="n">recent_outcomes</span><span class="p">[</span><span class="o">-</span><span class="n">window</span><span class="p">:]</span>
+    <span class="n">rolling_accuracy</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">recent</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">recent</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rolling_accuracy</span> <span class="o">&lt;</span> <span class="n">threshold</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--live&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fetch real data and run validation&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--ticker&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;SPY&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">live</span><span class="p">:</span>
+        <span class="n">bars</span> <span class="o">=</span> <span class="n">fetch_daily_bars</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="p">)</span>
+        <span class="n">featured</span> <span class="o">=</span> <span class="n">compute_target</span><span class="p">(</span><span class="n">compute_features</span><span class="p">(</span><span class="n">bars</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">walk_forward_validate</span><span class="p">(</span><span class="n">featured</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="p">()</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-v1&quot;</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Registered </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-v1 — active=</span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<h2>Test output — proof, not a claim</h2>
+<p class="subtitle">Real <code>pytest -v</code> output from this exact commit, captured when this page was generated.
+<code>xfail</code> lines prove the bug is real against the pre-fix code; <code>PASSED</code> lines prove the fix.</p>
+<pre class="test-output">============================= test session starts ==============================
+collecting ... collected 10 items
+
+model/tests/test_qa_gate_circuit_breaker.py::test_qa_hold_false_on_insufficient_data PASSED [ 10%]
+model/tests/test_qa_gate_circuit_breaker.py::test_qa_hold_true_when_rolling_accuracy_below_threshold PASSED [ 20%]
+model/tests/test_qa_gate_circuit_breaker.py::test_qa_hold_false_when_rolling_accuracy_above_threshold PASSED [ 30%]
+model/tests/test_qa_gate_circuit_breaker.py::test_qa_hold_only_looks_at_most_recent_window PASSED [ 40%]
+model/tests/test_qa_gate_circuit_breaker.py::test_raw_accuracy_alone_is_not_a_valid_gate XFAIL [ 50%]
+model/tests/test_qa_gate_circuit_breaker.py::test_registry_rejects_model_below_lift_gate PASSED [ 60%]
+model/tests/test_qa_gate_circuit_breaker.py::test_registry_accepts_model_above_lift_gate PASSED [ 70%]
+model/tests/test_walkforward_no_leakage.py::test_naive_split_has_no_target_leakage XFAIL [ 80%]
+model/tests/test_walkforward_no_leakage.py::test_gap_split_has_no_target_leakage PASSED [ 90%]
+model/tests/test_walkforward_no_leakage.py::test_gap_split_folds_are_chronological_and_non_overlapping PASSED [100%]
+
+========================= 8 passed, 2 xfailed in 1.23s =========================</pre>
+
+</main>
+<footer>
+    <div>© 2026 Mboya Jeffers</div>
+    <div style="margin-top:0.5rem;">
+        <a href="https://github.com/mboyajeffers" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/mboya-jeffers-6377ba325" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://x.com/Mboya_Jeffers" target="_blank" rel="noopener">X</a>
+        <a href="mailto:mboyajeffers9@gmail.com">Email</a>
+    </div>
+</footer>
+</body>
+</html>

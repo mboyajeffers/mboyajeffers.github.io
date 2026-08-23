@@ -125,14 +125,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .gd { color: #FF4689 } /* Generic.Deleted */
 .highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
 .highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
-.highlight .gr { color: #FF4689 } /* Generic.Error */
+.highlight .gr { color: #F8F8F2 } /* Generic.Error */
 .highlight .gh { color: #F8F8F2 } /* Generic.Heading */
 .highlight .gi { color: #A6E22E } /* Generic.Inserted */
 .highlight .go { color: #66D9EF } /* Generic.Output */
 .highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
 .highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
 .highlight .gu { color: #959077 } /* Generic.Subheading */
-.highlight .gt { color: #66D9EF } /* Generic.Traceback */
+.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
 .highlight .kc { color: #66D9EF } /* Keyword.Constant */
 .highlight .kd { color: #66D9EF } /* Keyword.Declaration */
 .highlight .kn { color: #FF4689 } /* Keyword.Namespace */
@@ -143,7 +143,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .m { color: #AE81FF } /* Literal.Number */
 .highlight .s { color: #E6DB74 } /* Literal.String */
 .highlight .na { color: #A6E22E } /* Name.Attribute */
-.highlight .nb { color: #A6E22E } /* Name.Builtin */
+.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
 .highlight .nc { color: #A6E22E } /* Name.Class */
 .highlight .no { color: #66D9EF } /* Name.Constant */
 .highlight .nd { color: #A6E22E } /* Name.Decorator */
@@ -177,7 +177,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
 .highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
 .highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
-.highlight .bp { color: #A6E22E } /* Name.Builtin.Pseudo */
+.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
 .highlight .fm { color: #A6E22E } /* Name.Function.Magic */
 .highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
 .highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
@@ -256,29 +256,29 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 
 <h2>Before → After</h2>
 <p class="subtitle">The pre-fix code is kept in the repo (not deleted) so this is checkable, not just asserted.</p>
-<h3>Before — <code>pipelines/solar/before/ingest_loop_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">"""BEFORE — issue #7: no health/staleness tracking at all. Kept intact so</span>
-<span class="sd">BUILD_LOG.md's claim is checkable.</span>
-<span class="sd">"""</span>
+<h3>Before — <code>pipelines/solar/before/ingest_loop_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;BEFORE — issue #7: no health/staleness tracking at all. Kept intact so</span>
+<span class="sd">BUILD_LOG.md&#39;s claim is checkable.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">ingest_all_naive</span><span class="p">(</span><span class="n">site_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">fetch_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Fetches each site and returns whatever it got — there is no record of *when*</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetches each site and returns whatever it got — there is no record of *when*</span>
 <span class="sd">    a site last succeeded, so a site that starts silently returning stale/empty data</span>
 <span class="sd">    (a sensor feed dies, an upstream API starts 200-ing with no data) is</span>
 <span class="sd">    indistinguishable from a healthy one until someone manually notices a report</span>
 <span class="sd">    looks wrong.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">site_id</span> <span class="ow">in</span> <span class="n">site_ids</span><span class="p">:</span>
         <span class="n">results</span><span class="p">[</span><span class="n">site_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_fn</span><span class="p">(</span><span class="n">site_id</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">results</span>
 </pre></div>
-<h3>Before — <code>pipelines/solar/before/run_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">"""BEFORE — issue #8: a multi-step run with no persisted state. Kept intact so</span>
-<span class="sd">BUILD_LOG.md's claim is checkable.</span>
-<span class="sd">"""</span>
+<h3>Before — <code>pipelines/solar/before/run_naive.py</code></h3><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;BEFORE — issue #8: a multi-step run with no persisted state. Kept intact so</span>
+<span class="sd">BUILD_LOG.md&#39;s claim is checkable.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
@@ -291,11 +291,11 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
     <span class="n">compute_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">write_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Runs all four steps in one shot. If normalize_fn or compute_fn raises,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runs all four steps in one shot. If normalize_fn or compute_fn raises,</span>
 <span class="sd">    nothing about *how far the run got* is recorded anywhere — a caller that</span>
 <span class="sd">    retries has no choice but to call fetch_fn again from scratch, even though</span>
 <span class="sd">    fetch (the expensive network step) already succeeded the first time.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">fetch_fn</span><span class="p">(</span><span class="n">site_id</span><span class="p">)</span>
     <span class="n">normalized</span> <span class="o">=</span> <span class="n">normalize_fn</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
     <span class="n">kpi</span> <span class="o">=</span> <span class="n">compute_fn</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
@@ -303,18 +303,18 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 </pre></div>
 
 <h3>After — <code>pipelines/solar/pipeline.py</code> (the fix, current on <code>main</code>)</h3>
-<div class="highlight"><pre><span></span><span class="sd">"""</span>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Solar pipeline — multi-site irradiance ingestion with health monitoring, and a</span>
 <span class="sd">resumable multi-step orchestration run.</span>
 
-<span class="sd">Same I/O/logic separation as the other pipelines. Live source: Open-Meteo's free</span>
-<span class="sd">weather API (no key), the same real source already used elsewhere in this account's</span>
+<span class="sd">Same I/O/logic separation as the other pipelines. Live source: Open-Meteo&#39;s free</span>
+<span class="sd">weather API (no key), the same real source already used elsewhere in this account&#39;s</span>
 <span class="sd">public solar capability demo.</span>
 
 <span class="sd">Two production issues are fixed here; see BUILD_LOG.md for the full postmortem on each:</span>
 <span class="sd">  7. Pipeline health monitoring + alerting (HealthMonitor)</span>
 <span class="sd">  8. Orchestration state machine + safe resume (PipelineRun, advance_one_step)</span>
-<span class="sd">"""</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
@@ -324,7 +324,7 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">OPEN_METEO_URL</span> <span class="o">=</span> <span class="s2">"https://api.open-meteo.com/v1/forecast"</span>
+<span class="n">OPEN_METEO_URL</span> <span class="o">=</span> <span class="s2">&quot;https://api.open-meteo.com/v1/forecast&quot;</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -333,10 +333,10 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HealthMonitor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Fix for issue #7: tracks the last successful ingest time per site, so a site</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix for issue #7: tracks the last successful ingest time per site, so a site</span>
 <span class="sd">    that silently stops producing fresh data is *detectable* instead of only</span>
 <span class="sd">    noticed weeks later when someone happens to check a report.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_last_success</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
@@ -347,9 +347,9 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_success</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">site_id</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">stale_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">threshold_seconds</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">"""Sites that have never succeeded, or whose last success is older than</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sites that have never succeeded, or whose last success is older than</span>
 <span class="sd">        the threshold — the set that should trigger an alert.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">stale</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">site_id</span><span class="p">,</span> <span class="n">last_ts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_success</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_ts</span> <span class="o">&gt;</span> <span class="n">threshold_seconds</span><span class="p">:</span>
@@ -362,20 +362,20 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RunState</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">PENDING</span> <span class="o">=</span> <span class="s2">"PENDING"</span>
-    <span class="n">INGESTED</span> <span class="o">=</span> <span class="s2">"INGESTED"</span>
-    <span class="n">NORMALIZED</span> <span class="o">=</span> <span class="s2">"NORMALIZED"</span>
-    <span class="n">COMPUTED</span> <span class="o">=</span> <span class="s2">"COMPUTED"</span>
-    <span class="n">WRITTEN</span> <span class="o">=</span> <span class="s2">"WRITTEN"</span>
+    <span class="n">PENDING</span> <span class="o">=</span> <span class="s2">&quot;PENDING&quot;</span>
+    <span class="n">INGESTED</span> <span class="o">=</span> <span class="s2">&quot;INGESTED&quot;</span>
+    <span class="n">NORMALIZED</span> <span class="o">=</span> <span class="s2">&quot;NORMALIZED&quot;</span>
+    <span class="n">COMPUTED</span> <span class="o">=</span> <span class="s2">&quot;COMPUTED&quot;</span>
+    <span class="n">WRITTEN</span> <span class="o">=</span> <span class="s2">&quot;WRITTEN&quot;</span>
 
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PipelineRun</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Fix for issue #8: persists which step a run has actually completed, so a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix for issue #8: persists which step a run has actually completed, so a</span>
 <span class="sd">    retry after a mid-run failure resumes from the last completed step instead of</span>
 <span class="sd">    redoing already-finished (possibly expensive, e.g. network) work, and never</span>
 <span class="sd">    produces a half-written final output.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">site_id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">state</span><span class="p">:</span> <span class="n">RunState</span> <span class="o">=</span> <span class="n">RunState</span><span class="o">.</span><span class="n">PENDING</span>
@@ -389,22 +389,22 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
     <span class="n">compute_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">write_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Executes exactly the next step for `run`'s current state, and only advances</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Executes exactly the next step for `run`&#39;s current state, and only advances</span>
 <span class="sd">    `run.state` if that step succeeds. Raises without corrupting `run` if the step</span>
 <span class="sd">    fails — the caller can inspect/retry `run` and this function will pick up</span>
 <span class="sd">    exactly where it left off.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">RunState</span><span class="o">.</span><span class="n">PENDING</span><span class="p">:</span>
-        <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"raw"</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">site_id</span><span class="p">)</span>
+        <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;raw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">site_id</span><span class="p">)</span>
         <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">RunState</span><span class="o">.</span><span class="n">INGESTED</span>
     <span class="k">elif</span> <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">RunState</span><span class="o">.</span><span class="n">INGESTED</span><span class="p">:</span>
-        <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"normalized"</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"raw"</span><span class="p">])</span>
+        <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;normalized&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;raw&quot;</span><span class="p">])</span>
         <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">RunState</span><span class="o">.</span><span class="n">NORMALIZED</span>
     <span class="k">elif</span> <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">RunState</span><span class="o">.</span><span class="n">NORMALIZED</span><span class="p">:</span>
-        <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"kpi"</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"normalized"</span><span class="p">])</span>
+        <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;normalized&quot;</span><span class="p">])</span>
         <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">RunState</span><span class="o">.</span><span class="n">COMPUTED</span>
     <span class="k">elif</span> <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">RunState</span><span class="o">.</span><span class="n">COMPUTED</span><span class="p">:</span>
-        <span class="n">write_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">site_id</span><span class="p">,</span> <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"kpi"</span><span class="p">])</span>
+        <span class="n">write_fn</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">site_id</span><span class="p">,</span> <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpi&quot;</span><span class="p">])</span>
         <span class="n">run</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">RunState</span><span class="o">.</span><span class="n">WRITTEN</span>
     <span class="c1"># RunState.WRITTEN: nothing left to do — calling advance again is a safe no-op</span>
     <span class="c1"># at the call site (run_to_completion below stops the loop at WRITTEN).</span>
@@ -425,10 +425,10 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
     <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
         <span class="n">OPEN_METEO_URL</span><span class="p">,</span>
         <span class="n">params</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">"latitude"</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span>
-            <span class="s2">"longitude"</span><span class="p">:</span> <span class="n">longitude</span><span class="p">,</span>
-            <span class="s2">"hourly"</span><span class="p">:</span> <span class="s2">"shortwave_radiation"</span><span class="p">,</span>
-            <span class="s2">"forecast_days"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">longitude</span><span class="p">,</span>
+            <span class="s2">&quot;hourly&quot;</span><span class="p">:</span> <span class="s2">&quot;shortwave_radiation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;forecast_days&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="p">)</span>
@@ -436,22 +436,22 @@ python<span class="w"> </span>pipeline.py<span class="w"> </span>--live<span cla
     <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-    <span class="k">if</span> <span class="s2">"--live"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;--live&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
         <span class="n">monitor</span> <span class="o">=</span> <span class="n">HealthMonitor</span><span class="p">()</span>
-        <span class="n">sites</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"brooklyn_ny"</span><span class="p">:</span> <span class="p">(</span><span class="mf">40.6782</span><span class="p">,</span> <span class="o">-</span><span class="mf">73.9442</span><span class="p">),</span> <span class="s2">"phoenix_az"</span><span class="p">:</span> <span class="p">(</span><span class="mf">33.4484</span><span class="p">,</span> <span class="o">-</span><span class="mf">112.0740</span><span class="p">)}</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;brooklyn_ny&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">40.6782</span><span class="p">,</span> <span class="o">-</span><span class="mf">73.9442</span><span class="p">),</span> <span class="s2">&quot;phoenix_az&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">33.4484</span><span class="p">,</span> <span class="o">-</span><span class="mf">112.0740</span><span class="p">)}</span>
         <span class="k">for</span> <span class="n">site_id</span><span class="p">,</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span> <span class="ow">in</span> <span class="n">sites</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">fetch_live_irradiance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"hourly"</span><span class="p">][</span><span class="s2">"shortwave_radiation"</span><span class="p">]</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;hourly&quot;</span><span class="p">][</span><span class="s2">&quot;shortwave_radiation&quot;</span><span class="p">]</span>
             <span class="n">peak</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">monitor</span><span class="o">.</span><span class="n">record_success</span><span class="p">(</span><span class="n">site_id</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">site_id</span><span class="si">}</span><span class="s2">: peak shortwave radiation today = </span><span class="si">{</span><span class="n">peak</span><span class="si">}</span><span class="s2"> W/m^2"</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"Stale sites (&gt;1hr since success):"</span><span class="p">,</span> <span class="n">monitor</span><span class="o">.</span><span class="n">stale_sites</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="mi">3600</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site_id</span><span class="si">}</span><span class="s2">: peak shortwave radiation today = </span><span class="si">{</span><span class="n">peak</span><span class="si">}</span><span class="s2"> W/m^2&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stale sites (&gt;1hr since success):&quot;</span><span class="p">,</span> <span class="n">monitor</span><span class="o">.</span><span class="n">stale_sites</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="mi">3600</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"Run with --live to hit the real Open-Meteo endpoint. "</span>
-              <span class="s2">"See tests/ for deterministic unit tests of the monitoring/orchestration logic."</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run with --live to hit the real Open-Meteo endpoint. &quot;</span>
+              <span class="s2">&quot;See tests/ for deterministic unit tests of the monitoring/orchestration logic.&quot;</span><span class="p">)</span>
 </pre></div>
 
 
@@ -467,7 +467,7 @@ pipelines/solar/tests/test_health_monitoring.py::test_fixed_monitor_reports_no_s
 pipelines/solar/tests/test_orchestration_resume.py::test_naive_run_refetches_on_retry_after_mid_run_failure XFAIL [ 80%]
 pipelines/solar/tests/test_orchestration_resume.py::test_fixed_run_resumes_without_redoing_the_completed_fetch_step PASSED [100%]
 
-========================= 3 passed, 2 xfailed in 0.14s =========================</pre>
+========================= 3 passed, 2 xfailed in 0.04s =========================</pre>
 
 </main>
 <footer>

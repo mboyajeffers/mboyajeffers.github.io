@@ -2,8 +2,9 @@ name: Update Reliability Patterns Pages
 
 on:
   schedule:
-    # 14:00 UTC daily -- picks up any update pushed to pipeline-reliability-patterns
-    # within a day; workflow_dispatch below gives an immediate manual refresh too.
+    # 14:00 UTC daily -- picks up any update pushed to pipeline-reliability-patterns or
+    # ml-signal-reliability-patterns within a day; workflow_dispatch below gives an
+    # immediate manual refresh too.
     - cron: '0 14 * * *'
   workflow_dispatch: {}
 
@@ -22,9 +23,13 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install markdown pygments pytest requests
+        # markdown/pygments/requests: site generation itself.
+        # pytest/pandas/numpy/scikit-learn/yfinance: real deps of ml-signal-reliability-patterns'
+        # own test suite, which this script now clones and runs directly (model/pipeline.py
+        # imports all four).
+        run: pip install markdown pygments pytest requests pandas numpy scikit-learn yfinance
 
-      - name: Generate reliability-patterns pages from the live source repo
+      - name: Generate reliability-patterns pages from the live source repos
         run: python3 scripts/generate_reliability_patterns.py
 
       - name: Commit if changed

@@ -28,6 +28,11 @@ OUT_ROOT = SITE_ROOT / "reliability-patterns"
 BUILD_DIR = SITE_ROOT / "_reliability_patterns_source"  # gitignored, ephemeral clone
 REPO_URL = "https://github.com/mboyajeffers/pipeline-reliability-patterns"
 
+MODEL_BUILD_DIR = SITE_ROOT / "_ml_signal_source"  # gitignored, ephemeral clone -- separate
+# from BUILD_DIR on purpose: two independent clones, so a failure in one repo's generation
+# can never contaminate or half-clobber the other's.
+MODEL_REPO_URL = "https://github.com/mboyajeffers/ml-signal-reliability-patterns"
+
 PIPELINES = ["finance", "crypto", "ecommerce", "solar"]
 
 CODE_STYLE = "monokai"
@@ -60,6 +65,46 @@ def run_pipeline_tests(pipeline: str) -> str:
         check=False,
     )
     return (result.stdout + result.stderr).strip()
+
+
+def clone_model_repo() -> str:
+    """Fresh shallow clone every run, mirroring clone_source_repo(). Returns the current
+    commit SHA."""
+    if MODEL_BUILD_DIR.exists():
+        shutil.rmtree(MODEL_BUILD_DIR)
+    run(["git", "clone", "--depth", "1", MODEL_REPO_URL, str(MODEL_BUILD_DIR)])
+    sha = run(["git", "rev-parse", "HEAD"], cwd=MODEL_BUILD_DIR).stdout.strip()
+    return sha
+
+
+def run_model_tests() -> str:
+    """Runs the real model test suite. Same shape as run_pipeline_tests()."""
+    result = run(
+        [sys.executable, "-m", "pytest", "model/tests", "-v", "--no-header"],
+        cwd=MODEL_BUILD_DIR,
+        check=False,
+    )
+    return (result.stdout + result.stderr).strip()
+
+
+def read_live_status() -> dict:
+    """Recomputes the live-tracking status fresh from the real, current
+    live/track_record.jsonl -- this is the number that was static and slowly going stale
+    on the architecture reference page. Every row is a real, dated, cron-appended entry;
+    nothing here is asserted, it's counted."""
+    import json
+
+    path = MODEL_BUILD_DIR / "live" / "track_record.jsonl"
+    if not path.exists():
+        return {"days": 0, "latest": None, "any_active": False}
+
+    rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    rows.sort(key=lambda r: r["date"])
+    return {
+        "days": len(rows),
+        "latest": rows[-1] if rows else None,
+        "any_active": any(r.get("active") for r in rows),
+    }
 
 
 def md_to_html(path: Path) -> str:
@@ -223,6 +268,10 @@ def build_index(sha: str) -> None:
             <h3>{p.capitalize()} Pipeline</h3>
             <p class="subtitle" style="margin-bottom:0;">2 realistic production issues found, fixed, and test-pinned. Full postmortem-style build log.</p>
         </a></div>"""
+    cards += """<div class="card tile"><a class="card-link" href="/reliability-patterns/ml-signal/">
+            <h3>ML Signal Model</h3>
+            <p class="subtitle" style="margin-bottom:0;">Walk-forward validated, governed by a real promotion gate. Live status computed fresh from the daily track record.</p>
+        </a></div>"""
     # Static, hand-built page (spans this repo + the sibling ml-signal-reliability-patterns
     # repo, so it isn't regenerated per-run the way the pipeline pages are) — not touched by
     # this script beyond this one card/link, so it survives every scheduled regeneration.
@@ -320,6 +369,81 @@ def build_pipeline_page(pipeline: str, sha: str) -> None:
     ))
 
 
+def build_model_page(sha: str) -> None:
+    mdir = MODEL_BUILD_DIR / "model"
+    readme_html = md_to_html(mdir / "README.md")
+    build_log_html = md_to_html(mdir / "BUILD_LOG.md")
+    test_output = run_model_tests()
+    status = read_live_status()
+
+    before_files = sorted((mdir / "before").glob("*.py"))
+    before_files = [f for f in before_files if f.name != "__init__.py"]
+    before_html = "".join(
+        f"<h3>Before — <code>{f.relative_to(MODEL_BUILD_DIR)}</code></h3>{code_to_html(f)}" for f in before_files
+    )
+    after_html = code_to_html(mdir / "pipeline.py")
+
+    if status["latest"]:
+        latest = status["latest"]
+        gate_state = "cleared" if latest.get("active") else "not yet cleared"
+        status_html = f"""
+<div class="card">
+<p><b>{status["days"]}</b> real, dated live-tracking day{"s" if status["days"] != 1 else ""} so far —
+one entry appended by the daily cron every trading day, win or lose.</p>
+<table>
+<tr><th>Latest</th><td>{latest["date"]}</td></tr>
+<tr><th>Model version</th><td><code>{latest["model_version"]}</code></td></tr>
+<tr><th>Mean accuracy</th><td>{latest["mean_accuracy"]:.3f}</td></tr>
+<tr><th>Mean baseline (this fold's own majority class)</th><td>{latest["mean_baseline"]:.3f}</td></tr>
+<tr><th>Mean lift</th><td>{latest["mean_lift"]:+.3f}</td></tr>
+<tr><th>Gate</th><td>{gate_state}</td></tr>
+</table>
+<p class="subtitle" style="margin-bottom:0;">Backtested and live are different claims, labeled
+every time — see the repo's own README before citing any number from here. A gate not yet
+cleared is disclosed, not hidden; that disclosure is the actual point of this section.</p>
+</div>"""
+    else:
+        status_html = '<div class="card"><p>No live-tracking days recorded yet.</p></div>'
+
+    content = f"""
+<p><a href="/reliability-patterns/">&larr; All pipelines</a></p>
+<h1>ML Signal Model</h1>
+<div class="badge-row">
+    <img src="https://github.com/mboyajeffers/ml-signal-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
+    <span class="pill">commit {sha[:7]}</span>
+    <a href="https://github.com/mboyajeffers/ml-signal-reliability-patterns" target="_blank" rel="noopener">View source on GitHub →</a>
+</div>
+<div class="card">{readme_html}</div>
+
+<h2>Live status — computed fresh, not asserted</h2>
+<p class="subtitle">Recomputed directly from <code>live/track_record.jsonl</code> every time this
+page is generated — the same file the daily cron appends to, read straight, not summarized from
+memory.</p>
+{status_html}
+
+<h2>Build Log — the postmortem</h2>
+{build_log_html}
+
+<h2>Before → After</h2>
+<p class="subtitle">The pre-fix code is kept in the repo (not deleted) so this is checkable, not just asserted.</p>
+{before_html}
+<h3>After — <code>model/pipeline.py</code> (the fix, current on <code>main</code>)</h3>
+{after_html}
+
+<h2>Test output — proof, not a claim</h2>
+<p class="subtitle">Real <code>pytest -v</code> output from this exact commit, captured when this page was generated.
+<code>xfail</code> lines prove the bug is real against the pre-fix code; <code>PASSED</code> lines prove the fix.</p>
+<pre class="test-output">{test_output}</pre>
+"""
+    write(OUT_ROOT / "ml-signal" / "index.html", render_page(
+        "ML Signal Model — Reliability Patterns",
+        "A walk-forward validated, governed equity-direction model. Live status computed fresh from the real daily track record.",
+        content,
+        url=f"{SITE_BASE}/reliability-patterns/ml-signal/",
+        image=f"{SITE_BASE}/assets/og/reliability-patterns-index.png",
+    ))
+
+
 def write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
@@ -334,6 +458,12 @@ def main() -> None:
     for p in PIPELINES:
         build_pipeline_page(p, sha)
     shutil.rmtree(BUILD_DIR)
+
+    model_sha = clone_model_repo()
+    print(f"cloned ml-signal-reliability-patterns @ {model_sha}")
+    build_model_page(model_sha)
+    shutil.rmtree(MODEL_BUILD_DIR)
+
     print("done")
 
 
