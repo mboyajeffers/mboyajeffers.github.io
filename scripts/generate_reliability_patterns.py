@@ -223,6 +223,13 @@ def build_index(sha: str) -> None:
             <h3>{p.capitalize()} Pipeline</h3>
             <p class="subtitle" style="margin-bottom:0;">2 realistic production issues found, fixed, and test-pinned. Full postmortem-style build log.</p>
         </a></div>"""
+    # Static, hand-built page (spans this repo + the sibling ml-signal-reliability-patterns
+    # repo, so it isn't regenerated per-run the way the pipeline pages are) — not touched by
+    # this script beyond this one card/link, so it survives every scheduled regeneration.
+    cards += """<div class="card tile"><a class="card-link" href="/reliability-patterns/architecture/">
+            <h3>Architecture Reference</h3>
+            <p class="subtitle" style="margin-bottom:0;">Both repos as a dependency graph, a real build timeline, and a live-verified status board.</p>
+        </a></div>"""
 
     content = f"""
 <h1>Pipeline Reliability Patterns</h1>
