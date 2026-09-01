@@ -201,7 +201,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1>ML Signal Model</h1>
 <div class="badge-row">
     <img src="https://github.com/mboyajeffers/ml-signal-reliability-patterns/actions/workflows/ci.yml/badge.svg" alt="CI status">
-    <span class="pill">commit a6f2449</span>
+    <span class="pill">commit 6514baf</span>
     <a href="https://github.com/mboyajeffers/ml-signal-reliability-patterns" target="_blank" rel="noopener">View source on GitHub →</a>
 </div>
 <div class="card"><h1 id="signal-model">Signal Model</h1>
@@ -227,14 +227,14 @@ page is generated — the same file the daily cron appends to, read straight, no
 memory.</p>
 
 <div class="card">
-<p><b>7</b> real, dated live-tracking days so far —
+<p><b>8</b> real, dated live-tracking days so far —
 one entry appended by the daily cron every trading day, win or lose.</p>
 <table>
-<tr><th>Latest</th><td>2026-08-29</td></tr>
-<tr><th>Model version</th><td><code>SPY-2026-08-29</code></td></tr>
-<tr><th>Mean accuracy</th><td>0.520</td></tr>
-<tr><th>Mean baseline (this fold's own majority class)</th><td>0.626</td></tr>
-<tr><th>Mean lift</th><td>-0.107</td></tr>
+<tr><th>Latest</th><td>2026-09-01</td></tr>
+<tr><th>Model version</th><td><code>SPY-2026-09-01</code></td></tr>
+<tr><th>Mean accuracy</th><td>0.514</td></tr>
+<tr><th>Mean baseline (this fold's own majority class)</th><td>0.628</td></tr>
+<tr><th>Mean lift</th><td>-0.114</td></tr>
 <tr><th>Gate</th><td>not yet cleared</td></tr>
 </table>
 <p class="subtitle" style="margin-bottom:0;">Backtested and live are different claims, labeled
@@ -592,7 +592,7 @@ model/tests/test_walkforward_no_leakage.py::test_naive_split_has_no_target_leaka
 model/tests/test_walkforward_no_leakage.py::test_gap_split_has_no_target_leakage PASSED [ 90%]
 model/tests/test_walkforward_no_leakage.py::test_gap_split_folds_are_chronological_and_non_overlapping PASSED [100%]
 
-========================= 8 passed, 2 xfailed in 2.03s =========================</pre>
+========================= 8 passed, 2 xfailed in 1.93s =========================</pre>
 
 </main>
 <footer>
