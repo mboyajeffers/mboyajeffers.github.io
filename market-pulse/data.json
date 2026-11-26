@@ -1,72 +1,72 @@
 {
-  "generated_at_utc": "2026-11-25T22:09:43+00:00",
+  "generated_at_utc": "2026-11-26T22:08:42+00:00",
   "finance": {
     "spy": {
       "latest": 716.7,
       "five_day_return_pct": -1.85
     },
     "vix": {
-      "latest": 28.29
+      "latest": 26.8
     }
   },
   "crypto": {
     "top_crypto": [
       {
         "symbol": "BTC",
-        "price_usd": 60130,
-        "change_24h_pct": 0.39
+        "price_usd": 60587,
+        "change_24h_pct": 0.76
       },
       {
         "symbol": "ETH",
-        "price_usd": 1683.05,
-        "change_24h_pct": 0.09
+        "price_usd": 1696.76,
+        "change_24h_pct": 0.83
       },
       {
         "symbol": "USDT",
-        "price_usd": 0.999072,
-        "change_24h_pct": 0.0
+        "price_usd": 0.999005,
+        "change_24h_pct": -0.01
       },
       {
         "symbol": "BNB",
-        "price_usd": 552.13,
-        "change_24h_pct": 0.51
+        "price_usd": 554.61,
+        "change_24h_pct": 0.47
       },
       {
         "symbol": "USDC",
-        "price_usd": 0.999539,
-        "change_24h_pct": -0.0
+        "price_usd": 0.999592,
+        "change_24h_pct": 0.0
       }
     ],
     "top_defi_tvl": [
       {
-        "name": "LayerZero V2",
-        "category": "Bridge",
-        "tvl_usd": 17838343261,
-        "change_7d_pct": 4.16
-      },
-      {
         "name": "Lido",
         "category": "Liquid Staking",
-        "tvl_usd": 16401400953,
-        "change_7d_pct": -4.52
+        "tvl_usd": 16492853843,
+        "change_7d_pct": -5.37
       },
       {
         "name": "Aave V3",
         "category": "Lending",
-        "tvl_usd": 15108672348,
-        "change_7d_pct": 10.58
+        "tvl_usd": 15473733866,
+        "change_7d_pct": 1.37
       },
       {
         "name": "Morpho Blue",
         "category": "Lending",
-        "tvl_usd": 9450263190,
-        "change_7d_pct": -4.22
+        "tvl_usd": 9327361688,
+        "change_7d_pct": -4.14
       },
       {
         "name": "SSV Network",
         "category": "Staking Pool",
-        "tvl_usd": 8931367721,
-        "change_7d_pct": -5.1
+        "tvl_usd": 8993623319,
+        "change_7d_pct": -4.35
+      },
+      {
+        "name": "WBTC",
+        "category": "Bridge",
+        "tvl_usd": 7129978338,
+        "change_7d_pct": -1.57
       }
     ]
   },
@@ -151,14 +151,14 @@
       "location": "Phoenix, AZ",
       "unit": "MJ/m2",
       "dates": [
-        "2026-11-25",
         "2026-11-26",
-        "2026-11-27"
+        "2026-11-27",
+        "2026-11-28"
       ],
       "shortwave_radiation_sum": [
-        13.62,
-        13.82,
-        13.32
+        13.79,
+        13.79,
+        10.35
       ]
     }
   }
